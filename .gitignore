@@ -20,6 +20,9 @@ projects/*/warehouse.duckdb
 .env.*
 !.env.example
 
+# transient ingest artifact
+data/raw/**/_manifest_codes.txt
+
 # OS
 .DS_Store
 Thumbs.db

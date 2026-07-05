@@ -1,0 +1,11 @@
+# Project 5 — Industry Value-Chain pipeline
+# Runs on Python 3.12. No Postgres driver needed: SQL is emitted as text files
+# for the Supabase web SQL Editor. OLS/HC3 done with numpy (no statsmodels).
+pandas>=2.2
+numpy>=1.26
+openpyxl>=3.1     # .xlsx reader (finflows_timeseries.xlsx)
+xlrd>=2.0         # legacy .xls reader (fundgrEB.xls, downloaded Damodaran files)
+duckdb>=1.0       # local analytical warehouse
+requests>=2.31    # ingest downloads
+jinja2>=3.1       # optional templating
+pytest>=8.0       # dev: quality/parse/crosswalk/analysis gates

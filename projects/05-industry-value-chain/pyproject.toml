@@ -1,0 +1,12 @@
+[project]
+name = "industry-value-chain"
+version = "0.1.0"
+description = "Conform Damodaran industry datasets into a DuckDB star schema and export a Supabase-ready Postgres database."
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
