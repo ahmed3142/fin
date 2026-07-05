@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Project 5 — Industry Value-Chain · Dataset Links</title>
+<style>
+  :root {
+    --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --border:rgba(11,11,11,0.10);
+    --accent:#4a3aa7; --tint:rgba(74,58,167,0.10);   /* Project 5 violet */
+    --link:#2a78d6; --mono:#6f6e69;
+  }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: var(--page); }
+  @page { size: 816px 1056px; margin: 0; }
+  .page { width: 816px; min-height: 1056px; background: var(--page); padding: 46px 52px 40px 52px; position: relative; }
+  .head { display: flex; gap: 15px; align-items: flex-start; margin-bottom: 22px; }
+  .accent-bar { width: 6px; align-self: stretch; border-radius: 3px; background: var(--accent); flex: none; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 0 0 6px 0; }
+  h1 { font-size: 27px; line-height: 1.15; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+  .subtitle { font-size: 13px; color: var(--ink-2); margin: 8px 0 0 0; line-height: 1.45; }
+  .section-label { font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 4px 0 10px 2px; display: flex; align-items: center; gap: 7px; }
+  .section-label::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--accent); flex: none; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: 13px 16px; margin-bottom: 11px; }
+  .src-name { font-size: 14px; font-weight: 650; color: var(--ink); }
+  .src-role { font-size: 11.5px; color: var(--ink-2); margin-top: 2px; line-height: 1.4; }
+  .links { margin-top: 9px; display: flex; flex-direction: column; gap: 7px; }
+  .lrow { display: flex; flex-direction: column; gap: 1px; }
+  .lrow .llabel { font-size: 12px; font-weight: 600; color: var(--link); text-decoration: underline; text-underline-offset: 2px; line-height: 1.3; }
+  .lrow .lurl { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 10.5px; color: var(--mono); word-break: break-all; line-height: 1.35; }
+  a { color: var(--link); }
+  .note { font-size: 10.5px; color: var(--ink-2); margin-top: 9px; line-height: 1.4; background: var(--tint); border-radius: 7px; padding: 7px 10px; }
+  .note::before { content: "⚠ "; color: var(--muted); }
+  .note.flat { background: rgba(11,11,11,0.045); }
+  .note.flat::before { content: "› "; }
+  .foot { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--grid); font-size: 10px; color: var(--muted); display: flex; justify-content: space-between; }
+  .files { margin-top: 2px; }
+  .files code { font-family: ui-monospace, Menlo, monospace; font-size: 9.5px; color: var(--ink-2); }
+  code { font-family: ui-monospace, Menlo, monospace; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="head">
+    <div class="accent-bar"></div>
+    <div>
+      <p class="eyebrow">Project 05 · Industry Value-Chain &amp; Margin-Distortion</p>
+      <h1>Dataset Links</h1>
+      <p class="subtitle">All free. Aswath Damodaran's industry datasets share one 94-industry key and live at
+      <code>/pc/datasets/&lt;stem&gt;.xls</code> — the datafile HTML pages mislabel their download links, so these
+      point at the canonical files the pipeline actually uses. Click a blue label; raw URL beneath for copy-paste.</p>
+    </div>
+  </div>
+
+  <div class="section-label">Core — the three thesis datasets (Damodaran, NYU Stern)</div>
+  <div class="card">
+    <div class="src-name">1 · Operating &amp; Net Margins</div>
+    <div class="src-role">Reported <em>and</em> R&amp;D/lease-adjusted operating margins + R&amp;D/Sales, SBC/Sales — the distortion is measured here.</div>
+    <div class="links">
+      <div class="lrow"><a class="llabel" href="https://pages.stern.nyu.edu/~adamodar/pc/datasets/margin.xls">margin.xls (data)</a><span class="lurl">https://pages.stern.nyu.edu/~adamodar/pc/datasets/margin.xls</span></div>
+      <div class="lrow"><a class="llabel" href="https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/margin.html">margin.html (definitions)</a><span class="lurl">https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/margin.html</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="src-name">2 · R&amp;D Expenditures</div>
+    <div class="src-role">R&amp;D intensity, 5-yr R&amp;D, and Damodaran's <strong>capitalized-R&amp;D estimate</strong> (never paired with the adjusted margin — that is his identity).</div>
+    <div class="links">
+      <div class="lrow"><a class="llabel" href="https://pages.stern.nyu.edu/~adamodar/pc/datasets/R&D.xls">R&amp;D.xls (data)</a><span class="lurl">https://pages.stern.nyu.edu/~adamodar/pc/datasets/R&D.xls</span></div>
+      <div class="lrow"><a class="llabel" href="https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/R&D.html">R&amp;D.html (definitions)</a><span class="lurl">https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/R&D.html</span></div>
+    </div>
+    <div class="note">The <code>R&amp;D.html</code> "download" link mistakenly points to <code>roe.xls</code> — use the direct <code>R&amp;D.xls</code> URL above.</div>
+  </div>
+  <div class="card">
+    <div class="src-name">3 · Financing Flows by Sector</div>
+    <div class="src-role">Dividends, buybacks, equity issuance, debt raised/repaid — the funding &amp; payout signature.</div>
+    <div class="links">
+      <div class="lrow"><a class="llabel" href="https://pages.stern.nyu.edu/~adamodar/pc/datasets/finflows.xls">finflows.xls (data)</a><span class="lurl">https://pages.stern.nyu.edu/~adamodar/pc/datasets/finflows.xls</span></div>
+      <div class="lrow"><a class="llabel" href="https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/finflows.html">finflows.html (definitions)</a><span class="lurl">https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/finflows.html</span></div>
+    </div>
+    <div class="note"><code>Net Equity Change = Issuance − Buybacks</code> (dividends NOT subtracted) — verified against the data; the file's own note is wrong.</div>
+  </div>
+
+  <div class="section-label">Valuation payoff — does the market price the adjusted margin?</div>
+  <div class="card">
+    <div class="src-name">4 · Price/Sales &amp; EV/Sales · PE &amp; PEG · Dividends vs FCFE</div>
+    <div class="src-role">The market-outcome variables the thesis regresses on (EV/Sales, P/E), plus payout capacity.</div>
+    <div class="links">
+      <div class="lrow"><a class="llabel" href="https://pages.stern.nyu.edu/~adamodar/pc/datasets/psdata.xls">psdata.xls — Price/Sales &amp; EV/Sales</a><span class="lurl">https://pages.stern.nyu.edu/~adamodar/pc/datasets/psdata.xls</span></div>
+      <div class="lrow"><a class="llabel" href="https://pages.stern.nyu.edu/~adamodar/pc/datasets/pedata.xls">pedata.xls — PE, PEG, expected growth</a><span class="lurl">https://pages.stern.nyu.edu/~adamodar/pc/datasets/pedata.xls</span></div>
+      <div class="lrow"><a class="llabel" href="https://pages.stern.nyu.edu/~adamodar/pc/datasets/divfcfe.xls">divfcfe.xls — Dividends vs FCFE</a><span class="lurl">https://pages.stern.nyu.edu/~adamodar/pc/datasets/divfcfe.xls</span></div>
+    </div>
+  </div>
+
+  <div class="section-label">Index, archives &amp; sibling facts (same 94-industry key)</div>
+  <div class="card">
+    <div class="src-name">5 · Data index &amp; the multi-year panel</div>
+    <div class="src-role">The catalog of ~30 industry datasets, and the archive that turns a single January snapshot into a panel.</div>
+    <div class="links">
+      <div class="lrow"><a class="llabel" href="https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datacurrent.html">datacurrent.html — full dataset index</a><span class="lurl">https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datacurrent.html</span></div>
+      <div class="lrow"><a class="llabel" href="https://pages.stern.nyu.edu/~adamodar/New_Home_Page/dataarchived.html">dataarchived.html — prior vintages (1/99 → 1/25)</a><span class="lurl">https://pages.stern.nyu.edu/~adamodar/New_Home_Page/dataarchived.html</span></div>
+    </div>
+    <div class="note flat">Archive pattern: <code>/pc/archives/&lt;stem&gt;&lt;YY&gt;.xls</code> (e.g. <code>margin23.xls</code>). Files at <code>/pc/datasets/</code> are overwritten each January — pin + hash per vintage.</div>
+  </div>
+  <div class="card">
+    <div class="src-name">6 · Optional enrichment (extensions)</div>
+    <div class="src-role">Value-creation, risk, reinvestment siblings + a firm-level drill-down to show within-industry dispersion.</div>
+    <div class="links">
+      <div class="lrow"><a class="llabel" href="https://pages.stern.nyu.edu/~adamodar/pc/datasets/EVA.xls">EVA.xls · roe.xls · wacc.xls · capex.xls · betas.xls (siblings)</a><span class="lurl">https://pages.stern.nyu.edu/~adamodar/pc/datasets/&lt;stem&gt;.xls</span></div>
+      <div class="lrow"><a class="llabel" href="https://www.sec.gov/search-filings/edgar-application-programming-interfaces">SEC EDGAR XBRL frames — within-industry dispersion</a><span class="lurl">https://data.sec.gov/api/xbrl/frames/us-gaap/&lt;Concept&gt;/USD/CY&lt;Year&gt;.json</span></div>
+      <div class="lrow"><a class="llabel" href="https://fred.stlouisfed.org/docs/api/fred/">FRED — macro regime for financing flows (panel)</a><span class="lurl">https://fred.stlouisfed.org/docs/api/fred/</span></div>
+    </div>
+    <div class="note">GICS is proprietary (no free crosswalk) — bridge to EDGAR via each filer's <strong>SIC</strong> instead.</div>
+  </div>
+
+  <div class="foot">
+    <div>
+      <div>Finance Data Portfolio · Project 05 · Industry Value-Chain dataset links</div>
+      <div class="files">Data © Aswath Damodaran (NYU Stern), educational use · pinned + hashed under <code>data/raw/</code></div>
+    </div>
+    <div>All sources free · no paid data</div>
+  </div>
+</div>
+</body>
+</html>
