@@ -1,0 +1,28 @@
+Finance Data-Analysis Portfolio — third-party data NOTICE
+=========================================================
+
+This repository's CODE is MIT-licensed (see LICENSE). The DATA it references
+and ingests belongs to the respective providers and is used here under their
+public/educational terms. Data snapshots committed under data/ are pinned,
+hashed copies for reproducibility — NOT redistributed as an authoritative
+source. Always re-fetch from the provider for current data.
+
+Providers used across the portfolio (see docs/DATASETS.md):
+
+- Aswath Damodaran (NYU Stern) industry datasets — https://pages.stern.nyu.edu/~adamodar/
+  Free for educational/research use. Files are overwritten each January; this
+  repo pins the Jan-2026 (TTM through ~Q3 2025) vintage with SHA-256 manifests.
+  Attribution: data by Prof. Aswath Damodaran, NYU Stern School of Business.
+
+- SEC EDGAR (data.sec.gov) — public domain U.S. government data; requires a
+  descriptive User-Agent header per SEC fair-access policy.
+
+- FRED (Federal Reserve Bank of St. Louis), BEA, BLS, U.S. Census, NSF NCSES,
+  Our World in Data, Oxford OxCGRT, NVD/NIST, CISA — public-sector or openly
+  licensed sources; attributed per their terms.
+
+- yfinance / Yahoo Finance, Stack Overflow Developer Survey (ODbL), Kaggle
+  community datasets, Wikipedia (CC BY-SA) — used under their respective terms.
+
+No proprietary/paywalled data (Statista, Macrotrends, Gartner/Canalys/Synergy,
+GICS) is redistributed here.
