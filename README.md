@@ -1,16 +1,17 @@
-# Finance Data-Analysis Portfolio — 4 Production-Grade Projects
+# Finance Data-Analysis Portfolio — 5 Production-Grade Projects
 
-Four CV-ready, finance-focused data analysis & visualization projects in Python
+Five CV-ready, finance-focused data analysis & visualization projects in Python
 (**numpy · pandas · DuckDB · matplotlib** + Streamlit / plotly). Every dataset below was
 **adversarially verified as free and accessible** (43 checks). Corrections from that
-verification are baked into each brief.
+verification are baked into each brief. **Project 5 ships as a runnable pipeline** with a
+Supabase-ready Postgres database — see [`projects/05-industry-value-chain/`](projects/05-industry-value-chain/).
 
 > Built for a finance-major portfolio: each project is scoped as a *reproducible pipeline*
 > (raw → staging → mart in DuckDB) with tests, CI, and a deployed dashboard — not a notebook dump.
 
 ---
 
-## The four projects
+## The five projects
 
 | # | Project | Core finance angle | Difficulty | Effort | Data cleanliness |
 |---|---------|--------------------|------------|--------|------------------|
@@ -18,6 +19,7 @@ verification are baked into each brief.
 | 2 | [Luxury Goods Market Share & Valuation](docs/briefs/02-luxury-goods.md) | Market share, segment mix, comps/multiples | Int→Adv | 60–90h | ★★★☆☆ (PDF extraction is manual) |
 | 3 | [Fortune 500 Financial Breakdowns](docs/briefs/03-fortune-500.md) | Sector profitability, concentration, churn | Int | 40–70h | ★★★★☆ (community CSVs) |
 | 4 | [Cloud / ERP / AI Vendor Intelligence](docs/briefs/04-cloud-ai-security.md) | Segment revenue × security-risk trade-off | Adv | 60–90h | ★★★☆☆ (CPE attribution hard) |
+| 5 | [Industry Value-Chain & Margin-Distortion](docs/briefs/05-damodaran-industry-value-chain.md) ⟶ [code](projects/05-industry-value-chain/) | Cross-dataset entity resolution, margins vs valuation | Adv | 55–80h | ★★★★☆ (clean values, dirty join key) |
 
 See [DATASETS.md](docs/DATASETS.md) for the master verified-source table.
 
@@ -35,6 +37,9 @@ See [DATASETS.md](docs/DATASETS.md) for the master verified-source table.
    multiples, market share. The segment/geography mapping from filings is real analyst work.
 4. **Cloud/ERP/AI + Security (advanced capstone).** Most differentiated (finance × cybersecurity),
    highest ceiling, hardest. Do it last, when the pipeline pattern is second nature.
+5. **Industry Value-Chain & Margin-Distortion (Damodaran capstone — built).** Conforms ~8 of Damodaran's
+   industry datasets onto one `dim_industry` spine and ships a **Supabase-ready Postgres DB**. The value is
+   the *join* + one honest, non-circular thesis (the market prices R&D-adjusted margins) — not the plumbing.
 
 **If you only build two:** #1 (Fortune 500) as the data-engineering showcase + #2 (Post-COVID)
 as the quant/finance showcase. Together they cover the whole "analyst who can engineer" story.
