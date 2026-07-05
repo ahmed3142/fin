@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Project 5 — How It Works: Theory, Data &amp; the Simple Version of the Tech</title>
+<style>
+  :root {
+    --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink-2:#4c4b47; --muted:#898781;
+    --grid:#e6e5df; --baseline:#c3c2b7; --border:rgba(11,11,11,0.10);
+    --accent:#4a3aa7; --accent-2:#6c5ce0; --tint:rgba(74,58,167,0.09); --tint-2:rgba(74,58,167,0.16);
+    --link:#2a78d6; --warn-bg:rgba(237,161,0,0.13); --good:#0a7d33; --good-bg:rgba(10,125,51,0.10);
+  }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: var(--page); line-height: 1.5; }
+  @page { size: 816px 1056px; margin: 0; }
+  .page { width: 816px; height: 1056px; background: var(--page); padding: 48px 54px 40px 54px; position: relative; page-break-after: always; overflow: hidden; }
+  .page:last-child { page-break-after: auto; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9em; background: rgba(74,58,167,0.08); padding: 0 3px; border-radius: 3px; }
+
+  /* running header + footer */
+  .rh { position: absolute; top: 20px; left: 54px; right: 54px; display: flex; justify-content: space-between; font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .foot { position: absolute; bottom: 20px; left: 54px; right: 54px; display: flex; justify-content: space-between; font-size: 9.5px; color: var(--muted); border-top: 1px solid var(--grid); padding-top: 9px; }
+
+  h2.sec { font-size: 22px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 4px 0; display: flex; align-items: center; gap: 10px; }
+  h2.sec .kicker { font-size: 12px; font-weight: 800; color: #fff; background: var(--accent); border-radius: 6px; padding: 3px 9px; letter-spacing: 0.02em; }
+  .lead { font-size: 13px; color: var(--ink-2); margin: 4px 0 16px 0; }
+
+  h3 { font-size: 13.5px; font-weight: 700; margin: 16px 0 7px 0; color: var(--ink); display: flex; align-items: center; gap: 7px; }
+  h3::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--accent); }
+  p { font-size: 12.2px; color: var(--ink-2); margin: 0 0 9px 0; }
+  p strong, li strong { color: var(--ink); font-weight: 650; }
+  .em { color: var(--accent); font-weight: 650; }
+
+  ul { margin: 0 0 9px 0; padding-left: 0; list-style: none; }
+  ul li { font-size: 12.2px; color: var(--ink-2); line-height: 1.5; padding-left: 16px; position: relative; margin-bottom: 6px; }
+  ul li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-2); }
+
+  .box { border-radius: 11px; padding: 12px 15px; margin: 10px 0; font-size: 12px; line-height: 1.5; }
+  .plain { background: var(--tint); }
+  .analogy { background: #fff; border: 1px dashed var(--accent-2); }
+  .warn { background: var(--warn-bg); }
+  .good { background: var(--good-bg); }
+  .box .lbl { display: inline-block; font-size: 9.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .plain .lbl { color: var(--accent); }
+  .analogy .lbl { color: var(--accent-2); }
+  .warn .lbl { color: #9a6a00; }
+  .good .lbl { color: var(--good); }
+  .box p { margin: 0; font-size: 12px; color: var(--ink-2); }
+  .box p + p { margin-top: 6px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: 13px 16px; margin: 10px 0; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* flow diagram */
+  .flow { display: flex; align-items: stretch; gap: 7px; margin: 12px 0; }
+  .fnode { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 11px; border-top: 3px solid var(--accent); }
+  .fnode .ft { font-size: 12px; font-weight: 700; }
+  .fnode .fd { font-size: 10.3px; color: var(--ink-2); margin-top: 3px; line-height: 1.35; }
+  .farrow { align-self: center; color: var(--baseline); font-size: 15px; }
+
+  /* life-cycle timeline */
+  .cycle { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0; }
+  .stage { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .stage .bar { height: 6px; }
+  .stage .body { padding: 9px 11px; }
+  .stage .st { font-size: 11.5px; font-weight: 750; }
+  .stage .row { font-size: 10.2px; color: var(--ink-2); margin-top: 5px; line-height: 1.3; }
+  .stage .row b { color: var(--ink); font-weight: 650; }
+
+  /* bar comparison */
+  .barcmp { margin: 6px 0; }
+  .barrow { display: grid; grid-template-columns: 92px 1fr 60px; gap: 9px; align-items: center; margin-bottom: 7px; }
+  .barrow .bl { font-size: 10.5px; color: var(--ink-2); text-align: right; font-weight: 600; }
+  .bartrack { height: 15px; background: var(--grid); border-radius: 4px; position: relative; overflow: hidden; }
+  .barfill { height: 100%; border-radius: 4px; }
+  .barrow .bv { font-size: 10.5px; font-weight: 700; color: var(--ink); }
+
+  /* hub schema */
+  .hub { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 10px 0; }
+  .chip2 { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 8px 10px; font-size: 10.6px; }
+  .chip2 b { display: block; font-size: 11px; color: var(--ink); font-weight: 700; }
+  .chip2 span { color: var(--ink-2); }
+  .center-chip { background: var(--accent); color: #fff; grid-column: 2; text-align: center; }
+  .center-chip b { color: #fff; }
+  .center-chip span { color: rgba(255,255,255,0.85); }
+
+  table.t { width: 100%; border-collapse: collapse; font-size: 11px; margin: 8px 0; }
+  table.t th { text-align: left; font-size: 9.3px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 0 8px 6px 0; border-bottom: 1px solid var(--grid); }
+  table.t td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--grid); color: var(--ink-2); vertical-align: top; line-height: 1.35; }
+  table.t tr:last-child td { border-bottom: none; }
+  table.t td.k { color: var(--ink); font-weight: 650; white-space: nowrap; font-family: ui-monospace, Menlo, monospace; font-size: 10px; }
+
+  /* gotcha */
+  .gotcha { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid #e0a11a; border-radius: 9px; padding: 10px 13px; margin-bottom: 9px; }
+  .gotcha .gt { font-size: 12px; font-weight: 700; color: var(--ink); }
+  .gotcha .gd { font-size: 11px; color: var(--ink-2); margin-top: 3px; line-height: 1.4; }
+  .gotcha .fix { font-size: 10.5px; color: var(--good); margin-top: 4px; font-weight: 600; }
+  .gotcha .fix::before { content: "✓ Fix: "; font-weight: 800; }
+
+  /* glossary */
+  .gloss { display: grid; grid-template-columns: 120px 1fr; gap: 6px 12px; font-size: 11.5px; align-items: start; }
+  .gloss dt { font-weight: 700; color: var(--accent); }
+  .gloss dd { margin: 0; color: var(--ink-2); line-height: 1.4; }
+
+  /* cover */
+  .cover { display: flex; flex-direction: column; height: 100%; }
+  .cover .top { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); font-weight: 800; }
+  .cover h1 { font-size: 42px; line-height: 1.1; letter-spacing: -0.02em; margin: auto 0 0 0; font-weight: 800; max-width: 640px; }
+  .cover .sub { font-size: 15px; color: var(--ink-2); margin: 16px 0 0 0; line-height: 1.55; max-width: 610px; }
+  .cover .rule { height: 5px; width: 74px; background: var(--accent); border-radius: 3px; margin: 22px 0; }
+  .cover .toc { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 7px 26px; }
+  .cover .toc div { font-size: 12px; color: var(--ink-2); padding: 6px 0; border-top: 1px solid var(--grid); display: flex; gap: 9px; }
+  .cover .toc b { color: var(--accent); font-weight: 800; }
+  .cover .meta { margin-top: 20px; font-size: 11px; color: var(--muted); }
+  .hero-num { display: inline-block; background: var(--tint-2); color: var(--accent); font-weight: 800; border-radius: 6px; padding: 1px 7px; }
+</style>
+</head>
+<body>
+
+<!-- ===================== COVER ===================== -->
+<section class="page cover">
+  <div class="top">Project 05 · Industry Value-Chain · How everything works</div>
+  <h1>The Margin-Distortion Project, explained.</h1>
+  <div class="rule"></div>
+  <p class="sub">A plain-language walkthrough of the <span class="em">finance theory</span> and the
+  <span class="em">datasets</span> behind Project 5 — and a simple, jargon-free version of how the software
+  turns a pile of spreadsheets into a shareable database. No code required to follow along.</p>
+  <div class="toc">
+    <div><b>01</b> The big idea in one breath</div>
+    <div><b>05</b> The datasets: what &amp; where</div>
+    <div><b>02</b> Theory · the corporate life cycle</div>
+    <div><b>06</b> The datasets: the gotchas we found</div>
+    <div><b>03</b> Theory · why R&amp;D hides profit</div>
+    <div><b>07</b> The tech, dumbed all the way down</div>
+    <div><b>04</b> Theory · how companies fund themselves</div>
+    <div><b>08</b> What you can ask it · how to view</div>
+  </div>
+  <div class="meta">Data © Aswath Damodaran (NYU Stern), free for educational use · Jan-2026 vintage
+  (trailing 12 months ≈ Q3 2025) · github.com/ahmed3142/fin</div>
+</section>
+
+<!-- ===================== 1 · BIG IDEA ===================== -->
+<section class="page">
+  <div class="rh"><span>Project 5 · How it works</span><span>01 · The big idea</span></div>
+  <h2 class="sec"><span class="kicker">01</span> The big idea, in one breath</h2>
+  <p class="lead">What the project actually asks — and why it's interesting.</p>
+
+  <p>Every company does three things in a chain: it <strong>invests</strong> (research &amp; development),
+  which — if it works — produces <strong>profit</strong> (margins), which then gets <strong>funded and handed
+  back</strong> to shareholders (dividends, buybacks, debt). Professor Aswath Damodaran publishes free data on
+  all three, broken down by industry. Nobody usually looks at them <em>together</em>.</p>
+
+  <div class="flow">
+    <div class="fnode"><div class="ft">① R&amp;D</div><div class="fd">What an industry spends building know-how &amp; products.</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="ft">② Margins</div><div class="fd">How much of each sales dollar it keeps as profit.</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="ft">③ Financing</div><div class="fd">How that profit is funded &amp; returned to owners.</div></div>
+  </div>
+
+  <p>This project joins those three tables (plus valuation tables) into one dataset and asks a single, pointed
+  question:</p>
+
+  <div class="box plain">
+    <span class="lbl">The thesis</span>
+    <p><strong>Reported profit margins make R&amp;D-heavy industries look worse than they really are — so ranking
+    industries by reported margins is misleading. Does the stock market already know this?</strong></p>
+  </div>
+
+  <p>The short answer we found: <strong>yes, mostly.</strong> The market's price of a company (its EV/Sales
+  ratio) lines up a little better with the <em>R&amp;D-adjusted</em> margin than the reported one
+  (<span class="hero-num">R² 0.425 vs 0.406</span>). The distortion is real but <strong>concentrated in a
+  handful of R&amp;D-heavy industries</strong> — software, semiconductors, pharma — not spread across all of them.</p>
+
+  <div class="two">
+    <div class="box good"><span class="lbl">What this is</span>
+      <p>A careful, reproducible comparison of ~94 U.S. industries, every number traceable to a primary source,
+      with the limitations stated up front.</p></div>
+    <div class="box warn"><span class="lbl">What this is NOT</span>
+      <p>A stock tip, a firm-by-firm claim, or proof of cause-and-effect. These are industry averages — a
+      description of the landscape, not advice.</p></div>
+  </div>
+
+  <div class="analogy"><span class="lbl">Analogy</span>
+    <p>Think of each industry as a <strong>restaurant</strong>. "Reported margin" is the profit after counting
+    this year's kitchen remodel as a pure loss. "Adjusted margin" spreads that remodel over the years it will
+    actually help. The remodel-heavy restaurants (R&amp;D-heavy industries) look unfairly unprofitable on the
+    first measure — and we test whether diners (the market) already price them fairly.</p>
+  </div>
+
+  <div class="foot"><span>Finance Data Portfolio</span><span>2 / 9</span></div>
+</section>
+
+<!-- ===================== 2 · LIFE CYCLE ===================== -->
+<section class="page">
+  <div class="rh"><span>Theory</span><span>02 · The corporate life cycle</span></div>
+  <h2 class="sec"><span class="kicker">02</span> The theory that ties it together</h2>
+  <p class="lead">Why R&amp;D, margins, and financing are really three views of one thing: a company's age.</p>
+
+  <p>Damodaran's signature idea is the <strong>corporate life cycle</strong>. A company (or a whole industry)
+  moves through stages, and at each stage its investment, profit, and funding behave in a predictable, linked
+  way. So an industry's position in one of our three tables should match its position in the others — they're
+  three clocks telling the same time.</p>
+
+  <div class="cycle">
+    <div class="stage"><div class="bar" style="background:#9085e9"></div><div class="body">
+      <div class="st">Young / Growth</div>
+      <div class="row"><b>R&amp;D:</b> very high — the whole point</div>
+      <div class="row"><b>Margins:</b> thin or negative</div>
+      <div class="row"><b>Funding:</b> issues stock (no cash yet)</div>
+    </div></div>
+    <div class="stage"><div class="bar" style="background:#6c5ce0"></div><div class="body">
+      <div class="st">Mature Growth</div>
+      <div class="row"><b>R&amp;D:</b> still high, moderating</div>
+      <div class="row"><b>Margins:</b> rising, moats forming</div>
+      <div class="row"><b>Funding:</b> starts self-funding</div>
+    </div></div>
+    <div class="stage"><div class="bar" style="background:#4a3aa7"></div><div class="body">
+      <div class="st">Mature Stable</div>
+      <div class="row"><b>R&amp;D:</b> lower</div>
+      <div class="row"><b>Margins:</b> fat &amp; stable</div>
+      <div class="row"><b>Funding:</b> buybacks + dividends; adds debt</div>
+    </div></div>
+    <div class="stage"><div class="bar" style="background:#2f2569"></div><div class="body">
+      <div class="st">Decline</div>
+      <div class="row"><b>R&amp;D:</b> shrinking</div>
+      <div class="row"><b>Margins:</b> compressing</div>
+      <div class="row"><b>Funding:</b> repays debt, pays out cash</div>
+    </div></div>
+  </div>
+
+  <h3>Why young firms <em>issue</em> stock and mature firms <em>buy it back</em></h3>
+  <p>This follows the <strong>pecking-order theory</strong>: companies prefer to fund themselves with internal
+  cash first, then borrowing, and only issue new stock as a last resort (issuing shares signals the stock might
+  be overpriced, and it dilutes existing owners). Young R&amp;D companies have <em>no</em> internal cash and
+  little borrowing capacity — so they're forced into that last-resort corner and issue equity. Mature companies
+  have plenty of cash, so they do the reverse: buy their own shares back.</p>
+
+  <div class="analogy"><span class="lbl">Analogy</span>
+    <p>A student (young firm) borrows and takes on housemates (issues equity) because they have no savings. A
+    established earner (mature firm) pays down the loan and buys the housemates out (buybacks + debt repayment).
+    Same person, different life stage — that's an industry moving down the table.</p>
+  </div>
+
+  <div class="box plain"><span class="lbl">Why it matters for the project</span>
+    <p>Because the stages are linked, the <em>interesting</em> industries are the ones that break the pattern —
+    e.g. a mature, cash-rich industry that <strong>still</strong> pours money into R&amp;D, or one that funds its
+    buybacks by <strong>borrowing</strong> rather than from profit. Joining the tables is what lets us spot those.</p>
+  </div>
+
+  <div class="foot"><span>Finance Data Portfolio</span><span>3 / 9</span></div>
+</section>
+
+<!-- ===================== 3 · R&D DISTORTION ===================== -->
+<section class="page">
+  <div class="rh"><span>Theory</span><span>03 · Why R&amp;D hides profit</span></div>
+  <h2 class="sec"><span class="kicker">03</span> The accounting trick at the heart of it</h2>
+  <p class="lead">Why reported margins understate R&amp;D-heavy industries — and how Damodaran corrects it.</p>
+
+  <p>When a company builds a <strong>factory</strong>, accounting rules spread its cost over the many years it
+  will be used (this is called <em>capitalizing</em> and <em>depreciating</em>). But when a company spends on
+  <strong>R&amp;D</strong>, the rules force it to count the <em>entire</em> cost as an expense in the year it's
+  spent — even though that research builds value for years to come.</p>
+
+  <p>The result: a company spending heavily on R&amp;D looks <strong>less profitable than it economically is</strong>,
+  because money that is really an <em>investment</em> is being subtracted from this year's profit.</p>
+
+  <div class="card">
+    <h3 style="margin-top:2px">The two ways to count R&amp;D (illustrative)</h3>
+    <div class="barcmp">
+      <div class="barrow"><div class="bl">Reported margin</div>
+        <div class="bartrack"><div class="barfill" style="width:56%;background:var(--baseline)"></div></div>
+        <div class="bv">lower</div></div>
+      <div class="barrow"><div class="bl">R&amp;D-adjusted</div>
+        <div class="bartrack"><div class="barfill" style="width:68%;background:var(--accent)"></div></div>
+        <div class="bv">truer</div></div>
+    </div>
+    <p style="font-size:11px; margin:4px 0 0 0;">Reported subtracts <em>all</em> of this year's R&amp;D now.
+    Adjusted treats R&amp;D like the factory — spread over its useful life — so the margin reflects the real
+    economics. The gap between the two bars <strong>is the distortion</strong>, and it is widest exactly where
+    R&amp;D spending is highest.</p>
+  </div>
+
+  <p>Damodaran does this correction for us: he estimates an R&amp;D "asset," spreads it over an industry-specific
+  life (~5 years for software, ~10 for pharma), and republishes an <strong>adjusted operating margin</strong>
+  right next to the reported one. Our project measures the gap between them across every industry.</p>
+
+  <h3>The test — and the honest result</h3>
+  <p>If reported margins mislead, then the market — which cares about real economics — should price companies in
+  line with the <em>adjusted</em> margin, not the reported one. We checked by comparing each industry's market
+  valuation (EV/Sales, P/E) against both margins:</p>
+  <ul>
+    <li><strong>EV/Sales fits the adjusted margin slightly better</strong> (R² 0.425 vs 0.406) — mild evidence the market sees through the accounting.</li>
+    <li>The adjustment <strong>reranks only 1 of 84 industries</strong> by 5+ places (rank correlation 0.998) — so the distortion doesn't reshuffle the whole league table…</li>
+    <li>…it's <strong>concentrated in the high-R&amp;D tail</strong> (software, semis, pharma). That's the honest, non-hyped finding.</li>
+  </ul>
+
+  <div class="box good"><span class="lbl">The guardrail that keeps it honest</span>
+    <p>The adjusted margin is <em>built from</em> Damodaran's R&amp;D estimate — so "proving" R&amp;D drives the
+    adjusted margin would just be re-deriving his own arithmetic (circular). We never do that; we point the test
+    at an <strong>independent outcome</strong> — the market price. The code even has an automatic check that
+    <strong>refuses</strong> to run the circular comparison.</p>
+  </div>
+
+  <div class="foot"><span>Finance Data Portfolio</span><span>4 / 9</span></div>
+</section>
+
+<!-- ===================== 4 · FINANCING ===================== -->
+<section class="page">
+  <div class="rh"><span>Theory</span><span>04 · How companies fund themselves</span></div>
+  <h2 class="sec"><span class="kicker">04</span> Dividends, buybacks &amp; the funding signature</h2>
+  <p class="lead">The third link in the chain — and two subtle traps the data reveals.</p>
+
+  <p>Once an industry is profitable, it faces a choice: keep the cash, hand it out as <strong>dividends</strong>,
+  or <strong>buy back its own shares</strong>. The mix is a fingerprint of maturity.</p>
+
+  <div class="two">
+    <div class="card"><h3 style="margin-top:2px">Dividends</h3>
+      <p style="margin:0;font-size:11.5px;">Sticky and rarely cut — so paying them signals management believes
+      profits are <strong>permanently</strong> high. Common in old, stable industries (utilities, staples).</p></div>
+    <div class="card"><h3 style="margin-top:2px">Buybacks</h3>
+      <p style="margin:0;font-size:11.5px;">Flexible and tax-friendly — used to return <em>spare</em> cash and
+      signal the shares are cheap. Dominant in tech &amp; pharma.</p></div>
+  </div>
+
+  <p>The data file tracks all of it: dividends, buybacks, new shares issued, and debt raised or repaid. One
+  especially useful number is <strong>Net Equity Change = shares issued − shares bought back</strong>. Negative
+  means the industry is a net <em>buyer</em> of its own stock (returning capital); positive means it's a net
+  <em>issuer</em> (raising it).</p>
+
+  <h3>Two traps hiding in the numbers</h3>
+  <div class="box warn"><span class="lbl">Trap 1 · Leverage-funded buybacks</span>
+    <p>Some mature industries buy back huge amounts of stock <strong>while simultaneously borrowing more</strong>.
+    That's capital return funded by <em>debt</em>, not by profit — a very different (and riskier) story than it
+    looks at first glance. Joining the financing table to the debt columns exposes it.</p>
+  </div>
+  <div class="box warn"><span class="lbl">Trap 2 · Buybacks that aren't really "returns"</span>
+    <p>Industries that pay staff heavily in stock (high stock-based compensation) issue lots of new shares to
+    employees, then buy shares back just to <em>offset</em> that dilution. Their gross buybacks look generous but
+    much of it is treading water — so <strong>gross buybacks overstate the cash actually returned</strong>. The
+    "Net Equity Change" number strips this out.</p>
+  </div>
+
+  <div class="box plain"><span class="lbl">The connecting thread</span>
+    <p>Notice how all three theory sections rhyme: <strong>young → invest &amp; issue equity</strong>;
+    <strong>mature → fat margins &amp; buy back stock</strong>; <strong>declining → shrink &amp; repay debt.</strong>
+    The whole project is really one question — <em>where is each industry on that arc, and does the data agree
+    with itself?</em></p>
+  </div>
+
+  <div class="foot"><span>Finance Data Portfolio</span><span>5 / 9</span></div>
+</section>
+
+<!-- ===================== 5 · DATASETS ===================== -->
+<section class="page">
+  <div class="rh"><span>The data</span><span>05 · What &amp; where</span></div>
+  <h2 class="sec"><span class="kicker">05</span> The datasets: what they are</h2>
+  <p class="lead">Free, industry-level, and all keyed to the same 94 industries.</p>
+
+  <p><strong>Aswath Damodaran</strong> is an NYU Stern finance professor who publishes ~30 free datasets every
+  January, each summarizing U.S. public companies <strong>by industry</strong>. Crucially, every file uses the
+  <strong>same ~94-industry list</strong> (alphabetically <code>Advertising</code> → <code>Utility (Water)</code>)
+  — that shared list is what lets us snap them together like Lego. The numbers are trailing-12-months through
+  about Q3 of the prior year, so the "2026" files really describe <strong>late 2025</strong>.</p>
+
+  <h3>The three core files (the value chain)</h3>
+  <table class="t">
+    <tr><th>File</th><th>Measures</th><th>Key columns we use</th></tr>
+    <tr><td class="k">margin.xls</td><td>Profitability</td><td>Gross &amp; net margin, <strong>reported</strong> operating margin, Damodaran's <strong>R&amp;D-adjusted</strong> operating margin, R&amp;D/Sales, stock-comp/Sales</td></tr>
+    <tr><td class="k">R&amp;D.xls</td><td>Investment</td><td>R&amp;D as % of revenue, capitalized-R&amp;D estimate, R&amp;D 1–5 years ago, 5-yr R&amp;D growth</td></tr>
+    <tr><td class="k">finflows.xls</td><td>Funding</td><td>Dividends, buybacks, equity issued, net equity change, debt raised/repaid, lease debt</td></tr>
+  </table>
+
+  <h3>The valuation files (the market's verdict)</h3>
+  <table class="t">
+    <tr><th>File</th><th>Measures</th><th>Key columns we use</th></tr>
+    <tr><td class="k">psdata.xls</td><td>Price vs sales</td><td>Price/Sales, <strong>EV/Sales</strong> (the market-price test)</td></tr>
+    <tr><td class="k">pedata.xls</td><td>Price vs earnings</td><td>Current / trailing / forward P/E, PEG, expected growth</td></tr>
+    <tr><td class="k">divfcfe.xls</td><td>Payout capacity</td><td>Payout ratio, free cash flow to equity, cash returned vs FCFE</td></tr>
+  </table>
+
+  <div class="box plain"><span class="lbl">One number to know: "value-weighted"</span>
+    <p>Each industry figure is a <strong>big-company-weighted average</strong> (add up all firms' dollars, then
+    divide) — <em>not</em> the typical firm. So "Software margin" is effectively Microsoft + Oracle + Adobe, not
+    a mid-sized studio. It describes the <strong>industry as a portfolio</strong>, which is exactly what we want
+    for a top-down comparison — but it's why we never claim anything about an individual company.</p>
+  </div>
+
+  <div class="foot"><span>Finance Data Portfolio</span><span>6 / 9</span></div>
+</section>
+
+<!-- ===================== 6 · GOTCHAS ===================== -->
+<section class="page">
+  <div class="rh"><span>The data</span><span>06 · The gotchas</span></div>
+  <h2 class="sec"><span class="kicker">06</span> The gotchas we caught</h2>
+  <p class="lead">Free data is messy. Finding and fixing these <em>is</em> the craftsmanship — and each one is real.</p>
+
+  <div class="gotcha">
+    <div class="gt">1 · The download links point to the wrong files</div>
+    <div class="gd">The web page for the R&amp;D data links to <code>roe.xls</code>; the financing page links to
+    <code>fundgrEB.xls</code>. Trusting the buttons gets you the wrong dataset entirely.</div>
+    <div class="fix">go straight to the real files at <code>/pc/datasets/&lt;name&gt;.xls</code>.</div>
+  </div>
+  <div class="gotcha">
+    <div class="gt">2 · A real spelling mistake in the data</div>
+    <div class="gd">One industry is spelled <code>Heathcare Information and Technology</code> (missing the "l") in
+    some files but correctly in others. Match the files on that raw text and the industry <em>silently vanishes</em>
+    — no error, just a wrong answer.</div>
+    <div class="fix">give every industry a stable ID via a spell-correcting lookup, and <strong>halt loudly</strong> if any name doesn't match.</div>
+  </div>
+  <div class="gotcha">
+    <div class="gt">3 · A definition that contradicts the data</div>
+    <div class="gd">The financing file's own notes say "Net Equity Change = issuance − (dividends + buybacks)".
+    The actual numbers say <strong>issuance − buybacks</strong> (dividends not subtracted). We checked the
+    arithmetic row-by-row and trusted the data, not the note.</div>
+    <div class="fix">document the true formula; compute real net payout separately when needed.</div>
+  </div>
+  <div class="gotcha">
+    <div class="gt">4 · Hidden "Total Market" summary rows</div>
+    <div class="gd">Each file ends with 2 grand-total rows. Leave them in and they act like a giant 95th
+    "industry" that swamps every average and chart.</div>
+    <div class="fix">strip any row containing "Total Market" before doing any statistic.</div>
+  </div>
+  <div class="gotcha">
+    <div class="gt">5 · Percentages vs. multiples</div>
+    <div class="gd">Margins are stored as decimals (0.23 = 23%), but EV/Sales and P/E are <em>multiples</em>
+    (6×, 20×) — not percentages. Rescale them the same way and a "6× EV/Sales" becomes a nonsensical "0.06".</div>
+    <div class="fix">tag each column's type so multiples are left exactly as published.</div>
+  </div>
+  <div class="gotcha">
+    <div class="gt">6 · The files are overwritten every January</div>
+    <div class="gd">Damodaran replaces each file in place each year at the same web address — so re-downloading
+    silently changes "last year's" numbers, and your past results become impossible to reproduce.</div>
+    <div class="fix">save a dated copy and a digital fingerprint (hash) of every file we used.</div>
+  </div>
+
+  <div class="foot"><span>Finance Data Portfolio</span><span>7 / 9</span></div>
+</section>
+
+<!-- ===================== 7 · TECH DUMBED DOWN ===================== -->
+<section class="page">
+  <div class="rh"><span>The tech, simply</span><span>07 · The assembly line</span></div>
+  <h2 class="sec"><span class="kicker">07</span> How the software works (no jargon)</h2>
+  <p class="lead">The whole program is an assembly line that turns messy spreadsheets into one clean, shareable database.</p>
+
+  <div class="flow" style="gap:5px">
+    <div class="fnode"><div class="ft">① Fetch</div><div class="fd">Download the 8 spreadsheets + take a fingerprint.</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="ft">② Tidy</div><div class="fd">Skip notes, find the header, blank out "NA".</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="ft">③ Match</div><div class="fd">Give each industry one stable ID.</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="ft">④ Shelve</div><div class="fd">Store as neat linked tables.</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="ft">⑤ Analyze</div><div class="fd">Run the margin &amp; market maths.</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="ft">⑥ Publish</div><div class="fd">Make files for a web database.</div></div>
+  </div>
+
+  <h3>"Shelving" the data — the one idea worth knowing</h3>
+  <p>Instead of one giant messy spreadsheet, the data is stored as a <strong>master list</strong> of industries
+  plus one small <strong>topic table</strong> for each subject, all pointing back to that master list. This
+  layout is called a <em>star schema</em> — picture the master list in the middle and the topic tables around it
+  like points of a star.</p>
+
+  <div class="hub">
+    <div class="chip2"><b>Margins</b><span>reported &amp; adjusted</span></div>
+    <div class="chip2 center-chip"><b>Master list</b><span>94 industries</span></div>
+    <div class="chip2"><b>R&amp;D</b><span>investment</span></div>
+    <div class="chip2"><b>Financing</b><span>dividends, buybacks</span></div>
+    <div class="chip2" style="text-align:center;color:var(--muted)">…8 topic tables total…</div>
+    <div class="chip2"><b>Valuation</b><span>EV/Sales, P/E</span></div>
+  </div>
+
+  <div class="analogy"><span class="lbl">Analogy</span>
+    <p>It's a <strong>library</strong>. There's one master catalogue (the list of industries), and separate
+    subject shelves (margins, R&amp;D, financing…) that all reference the same catalogue number. Ask "everything
+    about Semiconductors" and the system instantly gathers one card from each shelf.</p>
+  </div>
+
+  <h3>The plain-English glossary</h3>
+  <dl class="gloss">
+    <dt>DuckDB</dt><dd>A lightweight database that lives in a single file on the laptop — a spreadsheet that can do heavy lookups instantly. Used to <em>build</em> everything.</dd>
+    <dt>Postgres</dt><dd>The standard "serious" database format companies use. We export the finished data into it.</dd>
+    <dt>Supabase</dt><dd>A free website that hosts a Postgres database and gives you a click-through table viewer — so anyone can browse or query the data in a browser.</dd>
+    <dt>Quality gates</dt><dd>Automatic inspectors that <strong>refuse to build</strong> unless everything's right: exactly 94 industries, every name matched, no "Total" rows, firm counts add up, and the circular analysis is blocked.</dd>
+  </dl>
+
+  <div class="box good"><span class="lbl">Why this earns trust</span>
+    <p>One command rebuilds the entire thing from scratch, <strong>15 automatic tests</strong> confirm the maths
+    and the data checks, and every source file is fingerprinted — so the results are <strong>reproducible</strong>,
+    not a one-off spreadsheet nobody can re-run.</p>
+  </div>
+
+  <div class="foot"><span>Finance Data Portfolio</span><span>8 / 9</span></div>
+</section>
+
+<!-- ===================== 8 · USE / VIEW ===================== -->
+<section class="page">
+  <div class="rh"><span>Putting it to use</span><span>08 · Ask it · view it</span></div>
+  <h2 class="sec"><span class="kicker">08</span> What you can ask it, and where to look</h2>
+  <p class="lead">The finished database answers real questions in one line each.</p>
+
+  <h3>Questions the data can answer</h3>
+  <ul>
+    <li><strong>Which industries are most distorted by R&amp;D accounting?</strong> — sort by the gap between reported and adjusted margin (the R&amp;D-heavy tail rises to the top).</li>
+    <li><strong>Does the market price the reported or adjusted margin?</strong> — compare each against EV/Sales and P/E.</li>
+    <li><strong>Who funds buybacks with debt?</strong> — industries buying back stock <em>and</em> borrowing at the same time.</li>
+    <li><strong>Which industries look like "growth" vs "mature"?</strong> — high R&amp;D + equity issuance vs fat margins + buybacks.</li>
+  </ul>
+
+  <div class="box plain"><span class="lbl">The headline, one more time</span>
+    <p>Across 84 non-financial industries, the market's EV/Sales tracks the <strong>R&amp;D-adjusted</strong>
+    margin a little better than the reported one (<span class="hero-num">R² 0.425 vs 0.406</span>). The margin
+    adjustment reshuffles almost nobody (rank correlation 0.998) — so the distortion is <strong>concentrated in
+    the high-R&amp;D tail</strong>, and that's exactly where screening on reported margins goes wrong.</p>
+  </div>
+
+  <h3>Where everything lives</h3>
+  <table class="t">
+    <tr><th>You want…</th><th>Look at…</th></tr>
+    <tr><td>This explainer &amp; the deck</td><td class="k">docs/pdf/</td></tr>
+    <tr><td>The full written brief</td><td class="k">docs/briefs/05-…md</td></tr>
+    <tr><td>The pipeline code</td><td class="k">projects/05-industry-value-chain/src/</td></tr>
+    <tr><td>Ready-to-load database files</td><td class="k">…/sql/postgres/</td></tr>
+    <tr><td>Step-by-step Supabase guide</td><td class="k">…/docs/SUPABASE.md</td></tr>
+  </table>
+
+  <div class="box good"><span class="lbl">See it in a browser</span>
+    <p>Open a free Supabase project → SQL Editor → paste the four <code>.sql</code> files in order → the whole
+    dataset appears as clickable tables, with an automatic web API. Full instructions in
+    <code>SUPABASE.md</code>. Everything is free, and no private keys ever leave your machine.</p>
+  </div>
+
+  <div class="foot"><span>Finance Data Portfolio · Project 05 · github.com/ahmed3142/fin</span><span>9 / 9</span></div>
+</section>
+
+</body>
+</html>
