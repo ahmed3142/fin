@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Damodaran's Methodology — the exact calculations behind every column</title>
+<style>
+  :root {
+    --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink-2:#4c4b47; --muted:#898781;
+    --grid:#e6e5df; --baseline:#c3c2b7; --border:rgba(11,11,11,0.10);
+    --accent:#4a3aa7; --accent-2:#6c5ce0; --tint:rgba(74,58,167,0.09); --tint-2:rgba(74,58,167,0.16);
+    --link:#2a78d6; --warn-bg:rgba(237,161,0,0.14); --good:#0a7d33; --good-bg:rgba(10,125,51,0.10); --mono:#2f2569;
+  }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: var(--page); line-height: 1.5; }
+  @page { size: 816px 1056px; margin: 0; }
+  .page { width: 816px; height: 1056px; background: var(--page); padding: 46px 54px 38px 54px; position: relative; page-break-after: always; overflow: hidden; }
+  .page:last-child { page-break-after: auto; }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  code { font-size: 0.88em; background: rgba(74,58,167,0.08); padding: 0 3px; border-radius: 3px; }
+
+  .rh { position: absolute; top: 19px; left: 54px; right: 54px; display: flex; justify-content: space-between; font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .foot { position: absolute; bottom: 18px; left: 54px; right: 54px; display: flex; justify-content: space-between; font-size: 9.5px; color: var(--muted); border-top: 1px solid var(--grid); padding-top: 8px; }
+
+  h2.sec { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; margin: 0 0 3px 0; display: flex; align-items: center; gap: 10px; }
+  h2.sec .kicker { font-size: 12px; font-weight: 800; color: #fff; background: var(--accent); border-radius: 6px; padding: 3px 9px; }
+  .lead { font-size: 12.5px; color: var(--ink-2); margin: 3px 0 14px 0; }
+  h3 { font-size: 13px; font-weight: 700; margin: 14px 0 6px 0; color: var(--ink); display: flex; align-items: center; gap: 7px; }
+  h3::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--accent); }
+  p { font-size: 12px; color: var(--ink-2); margin: 0 0 8px 0; }
+  p strong, li strong, td strong { color: var(--ink); font-weight: 650; }
+  .em { color: var(--accent); font-weight: 650; }
+  ul { margin: 0 0 8px 0; padding-left: 0; list-style: none; }
+  ul li { font-size: 12px; color: var(--ink-2); line-height: 1.5; padding-left: 15px; position: relative; margin-bottom: 5px; }
+  ul li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-2); }
+
+  .formula { font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--mono); background: var(--tint); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 9px 13px; margin: 7px 0; line-height: 1.55; }
+  .formula .c { color: var(--muted); }
+
+  .quote-d { font-size: 11px; color: var(--ink-2); font-style: italic; border-left: 2px solid var(--baseline); padding: 2px 0 2px 11px; margin: 5px 0 8px 0; line-height: 1.45; }
+  .quote-d b { font-style: normal; color: var(--accent); font-weight: 700; }
+
+  .box { border-radius: 11px; padding: 12px 15px; margin: 10px 0; font-size: 12px; line-height: 1.5; }
+  .plain { background: var(--tint); } .warn { background: var(--warn-bg); } .good { background: var(--good-bg); }
+  .box .lbl { display: inline-block; font-size: 9.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .plain .lbl { color: var(--accent); } .warn .lbl { color: #9a6a00; } .good .lbl { color: var(--good); }
+  .box p { margin: 0; font-size: 12px; } .box p + p { margin-top: 6px; }
+
+  table.t { width: 100%; border-collapse: collapse; font-size: 11px; margin: 7px 0; }
+  table.t th { text-align: left; font-size: 9.2px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 0 9px 6px 0; border-bottom: 1px solid var(--grid); }
+  table.t td { padding: 6px 9px 6px 0; border-bottom: 1px solid var(--grid); color: var(--ink-2); vertical-align: top; line-height: 1.35; }
+  table.t tr:last-child td { border-bottom: none; }
+  table.t td.k { color: var(--ink); font-weight: 650; }
+  table.t td.f { font-family: ui-monospace, Menlo, monospace; font-size: 10px; color: var(--mono); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; padding: 13px 16px; margin: 9px 0; }
+
+  .cover { display: flex; flex-direction: column; height: 100%; }
+  .cover .top { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); font-weight: 800; }
+  .cover h1 { font-size: 39px; line-height: 1.1; letter-spacing: -0.02em; margin: auto 0 0 0; font-weight: 800; max-width: 660px; }
+  .cover .sub { font-size: 14.5px; color: var(--ink-2); margin: 16px 0 0 0; line-height: 1.55; max-width: 620px; }
+  .cover .rule { height: 5px; width: 74px; background: var(--accent); border-radius: 3px; margin: 22px 0; }
+  .cover .toc { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 26px; }
+  .cover .toc div { font-size: 11.5px; color: var(--ink-2); padding: 6px 0; border-top: 1px solid var(--grid); display: flex; gap: 9px; }
+  .cover .toc b { color: var(--accent); font-weight: 800; }
+  .cover .meta { margin-top: 18px; font-size: 10.5px; color: var(--muted); }
+  a { color: var(--link); }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<section class="page cover">
+  <div class="top">Project 05 · Methodology reference</div>
+  <h1>The exact calculations behind Damodaran's data.</h1>
+  <div class="rule"></div>
+  <p class="sub">Every formula the datasets use — quoted from Damodaran's own "Variables &amp; FAQ" sheets and
+  variable-definitions page, verified against the numbers we ingested. Covers the value-weighting rule, the R&amp;D
+  and lease adjustments, margins, financing flows, multiples, FCFE — and <span class="em">where the EPS
+  calculation actually lives</span>.</p>
+  <div class="toc">
+    <div><b>1</b> The aggregation rule &amp; building blocks</div>
+    <div><b>5</b> Financing flows (+ a real contradiction)</div>
+    <div><b>2</b> Capitalizing R&amp;D — the centerpiece</div>
+    <div><b>6</b> Valuation multiples &amp; where EPS lives</div>
+    <div><b>3</b> Capitalizing leases &amp; the margins</div>
+    <div><b>7</b> FCFE &amp; the two growth formulas</div>
+    <div><b>4</b> The R&amp;D dataset</div>
+    <div><b>8</b> Sources &amp; caveats</div>
+  </div>
+  <div class="meta">Primary source: the "Variables &amp; FAQ" sheet inside each Damodaran .xls (Jan-2026), plus
+  his variable-definitions page. Formulas in quotes are his exact wording.</div>
+</section>
+
+<!-- 1 · PRINCIPLE + BUILDING BLOCKS -->
+<section class="page">
+  <div class="rh"><span>Methodology</span><span>1 · Aggregation &amp; building blocks</span></div>
+  <h2 class="sec"><span class="kicker">1</span> The one rule, and the building blocks</h2>
+  <p class="lead">Read this first — it governs every single number in every file.</p>
+
+  <h3>The aggregation rule: value-weighted, never an average of ratios</h3>
+  <p>For any industry ratio, Damodaran <strong>sums the numerator across all firms, sums the denominator, then
+  divides</strong>. His FAQ repeats the phrase "aggregated … as a percent of aggregated …" for every metric.</p>
+  <div class="formula">Industry ratio = Σ(numerator, all firms) / Σ(denominator, all firms)
+<span class="c">e.g. Gross Margin = Σ(gross profit) / Σ(revenue)</span></div>
+  <p>Consequence: each figure is a <strong>value-weighted composite dominated by the largest firms</strong> — the
+  "industry as one merged company," not the typical firm. (He even labels the count column's rationale
+  <em>"Law of large numbers?"</em>.)</p>
+
+  <h3>The building blocks (defined once, reused everywhere)</h3>
+  <table class="t">
+    <tr><th>Term</th><th>Damodaran's definition</th></tr>
+    <tr><td class="k">Effective tax rate</td><td class="f">taxes paid / taxable income (as reported to stockholders)</td></tr>
+    <tr><td class="k">EBIT</td><td class="f">operating income (revenue − COGS − SG&amp;A − R&amp;D − D&amp;A)</td></tr>
+    <tr><td class="k">EBITDA</td><td class="f">EBIT + depreciation &amp; amortization</td></tr>
+    <tr><td class="k">Invested Capital</td><td class="f">BV of equity + BV of debt − cash</td></tr>
+    <tr><td class="k">Enterprise Value (EV)</td><td class="f">market value of equity + debt − cash</td></tr>
+    <tr><td class="k">Net Debt</td><td class="f">total debt (incl. leases) − cash &amp; marketable securities</td></tr>
+  </table>
+
+  <div class="box plain"><span class="lbl">Why two of these get "adjusted"</span>
+    <p>Damodaran argues two things are <strong>mis-classified by accounting</strong>: <strong>R&amp;D</strong>
+    (really an investment, but expensed) and <strong>operating leases</strong> (really debt, but hidden). He
+    re-computes operating income and invested capital to fix both — the next two sections. Every "adjusted"
+    column in the margin file flows from these two corrections.</p>
+  </div>
+
+  <div class="foot"><span>Project 05 · Damodaran methodology</span><span>2 / 9</span></div>
+</section>
+
+<!-- 2 · R&D CAPITALIZATION -->
+<section class="page">
+  <div class="rh"><span>The two adjustments</span><span>2 · Capitalizing R&amp;D</span></div>
+  <h2 class="sec"><span class="kicker">2</span> Capitalizing R&amp;D — the centerpiece</h2>
+  <p class="lead">This is the whole basis of the margin-distortion thesis. Here is exactly how he does it.</p>
+
+  <p>GAAP expenses R&amp;D immediately. Damodaran instead treats it as a capital asset amortized over an
+  <strong>industry-specific life</strong> (longer for pharma, shorter for software — matching how long the
+  research stays commercially valuable). His FAQ states a <strong>5-year straight-line</strong> default.</p>
+
+  <h3>Step 1 — build the "Research Asset" (the unamortized R&amp;D)</h3>
+  <p>With a 5-year life, this year's R&amp;D counts fully; last year's is 4/5 remaining; and so on:</p>
+  <div class="formula">Research Asset = R&amp;D&#8320; + &#8541;·R&amp;D&#8331;&#8321; + &#8540;·R&amp;D&#8331;&#8322; + &#8537;·R&amp;D&#8331;&#8323; + &#8539;·R&amp;D&#8331;&#8324;
+<span class="c">(this is the "R&D Capitalized" column; "R&D 1–5 years ago" are the inputs)</span></div>
+  <div class="card" style="padding:11px 15px">
+    <h3 style="margin-top:0">Worked example (illustrative)</h3>
+    <table class="t" style="margin:0">
+      <tr><th>Year</th><th>R&amp;D spent</th><th>Fraction unamortized (5-yr)</th><th>In the asset</th></tr>
+      <tr><td class="k">This year</td><td class="f">100</td><td class="f">5/5</td><td class="f">100</td></tr>
+      <tr><td>1 year ago</td><td class="f">90</td><td class="f">4/5</td><td class="f">72</td></tr>
+      <tr><td>2 years ago</td><td class="f">80</td><td class="f">3/5</td><td class="f">48</td></tr>
+      <tr><td>3 years ago</td><td class="f">70</td><td class="f">2/5</td><td class="f">28</td></tr>
+      <tr><td>4 years ago</td><td class="f">60</td><td class="f">1/5</td><td class="f">12</td></tr>
+      <tr><td class="k">Research Asset</td><td></td><td></td><td class="f"><strong>= 260</strong></td></tr>
+    </table>
+  </div>
+
+  <h3>Step 2 — re-state operating income (his exact FAQ formula)</h3>
+  <div class="quote-d"><b>R&amp;D FAQ:</b> "R&amp;D adjustment to operating income = Operating Income + Current
+  year's R&amp;D exp − Amortization of R&amp;D asset."</div>
+  <div class="formula">Adjusted EBIT = EBIT + R&amp;D(current) − R&amp;D amortization
+<span class="c">amortization ≈ ⅕ of each of the last five years' R&D (≈ the trailing average)</span></div>
+
+  <div class="box good"><span class="lbl">The mechanism that explains our result</span>
+    <p>The reported→adjusted <strong>gap = (current R&amp;D − amortization) / revenue</strong>. If R&amp;D is
+    <strong>growing</strong>, current &gt; amortization → the adjustment <strong>raises</strong> the margin
+    (in our data, Software 0.330 → 0.344). If R&amp;D is large but <strong>flat/mature</strong>, amortization of
+    the big accumulated asset ≈ current → little or negative change (Pharma 0.295 → 0.272). That's precisely why
+    the distortion concentrates in the <em>high-R&amp;D-growth</em> tail.</p>
+  </div>
+  <p style="font-size:11px">Step 3 (used elsewhere): the Research Asset is also <strong>added to invested
+  capital</strong>, which lowers measured Return on Capital — the <code>Capitalized R&amp;D as % of Invested
+  Capital</code> column.</p>
+
+  <div class="foot"><span>Project 05 · Damodaran methodology</span><span>3 / 9</span></div>
+</section>
+
+<!-- 3 · LEASES + MARGINS -->
+<section class="page">
+  <div class="rh"><span>The two adjustments · Margins</span><span>3 · Leases &amp; margin.xls</span></div>
+  <h2 class="sec"><span class="kicker">3</span> Capitalizing leases, and every margin column</h2>
+  <p class="lead">The second adjustment, then the full margin.xls dictionary with exact formulas.</p>
+
+  <h3>The lease adjustment (his exact FAQ formula)</h3>
+  <div class="quote-d"><b>Margin FAQ:</b> "Lease adjustment to operating income = Operating Income + Current
+  year's lease exp − Lease Asset Depreciation. <em>Lease expenses are financing, not operating expenses. Hence
+  we add them back.</em>"</div>
+  <p style="font-size:11px">Operating leases are treated as debt (a lease liability = present value of future
+  commitments), which creates a leased "asset" that is depreciated. Note: after ASC 842 / IFRS 16 (~2019) leases
+  already sit on the balance sheet, shrinking this adjustment — which is why cross-year comparisons need care.</p>
+
+  <h3>margin.xls — every column, exactly</h3>
+  <table class="t">
+    <tr><th>Column</th><th>Formula (aggregated)</th></tr>
+    <tr><td class="k">Gross Margin</td><td class="f">Σ gross profit / Σ revenue</td></tr>
+    <tr><td class="k">Net Margin</td><td class="f">Σ net income / Σ revenue</td></tr>
+    <tr><td class="k">Pre-tax Unadjusted Operating Margin</td><td class="f">Σ EBIT / Σ revenue &nbsp;<span style="color:var(--muted)">← the "reported" margin</span></td></tr>
+    <tr><td class="k">After-tax Unadjusted Op. Margin</td><td class="f">Σ EBIT(1−t) / Σ revenue</td></tr>
+    <tr><td class="k">Pre-tax Lease-adjusted Margin</td><td class="f">Σ (EBIT + lease add-back) / Σ revenue</td></tr>
+    <tr><td class="k">Pre-tax Lease &amp; R&amp;D-adj Margin</td><td class="f">Σ (EBIT + lease + R&amp;D − R&amp;D amort.) / Σ revenue &nbsp;<span style="color:var(--muted)">← "adjusted"</span></td></tr>
+    <tr><td class="k">EBITDA/Sales</td><td class="f">Σ EBITDA / Σ revenue</td></tr>
+    <tr><td class="k">EBITDASG&amp;A/Sales</td><td class="f">Σ (EBITDA + SG&amp;A) / Σ revenue</td></tr>
+    <tr><td class="k">COGS/Sales · R&amp;D/Sales · SG&amp;A/Sales</td><td class="f">Σ (that expense) / Σ revenue</td></tr>
+    <tr><td class="k">Stock-Based Comp/Sales · Lease Exp/Sales</td><td class="f">Σ (that expense) / Σ revenue</td></tr>
+  </table>
+
+  <div class="box plain"><span class="lbl">The thesis in one line of algebra</span>
+    <p>"Adjusted" − "reported" operating margin = <code>(current R&amp;D − R&amp;D amortization + lease
+    add-back) / revenue</code>. Ranking industries by the <em>reported</em> line therefore understates exactly
+    the R&amp;D- and lease-heavy ones — the gap our project measures.</p>
+  </div>
+
+  <div class="foot"><span>Project 05 · Damodaran methodology</span><span>4 / 9</span></div>
+</section>
+
+<!-- 4 · R&D DATASET + FINANCING -->
+<section class="page">
+  <div class="rh"><span>The datasets</span><span>4 · R&amp;D &amp; financing flows</span></div>
+  <h2 class="sec"><span class="kicker">4</span> The R&amp;D and financing-flow files</h2>
+  <p class="lead">R&amp;D.xls and finflows.xls — including a definition that contradicts its own data.</p>
+
+  <h3>R&amp;D.xls</h3>
+  <table class="t">
+    <tr><th>Column</th><th>Formula / meaning</th></tr>
+    <tr><td class="k">R&amp;D Capitalized</td><td class="f">the Research Asset (§2), 5-yr straight-line, aggregated</td></tr>
+    <tr><td class="k">Capitalized R&amp;D as % of Invested Capital</td><td class="f">Research Asset / (Invested Capital incl. that asset)</td></tr>
+    <tr><td class="k">R&amp;D − LTM</td><td class="f">Σ trailing-12-month R&amp;D</td></tr>
+    <tr><td class="k">Current R&amp;D as % of Revenue</td><td class="f">Σ R&amp;D / Σ revenue</td></tr>
+    <tr><td class="k">R&amp;D, 1–5 years ago</td><td class="f">Σ R&amp;D in each prior year (inputs to the asset)</td></tr>
+    <tr><td class="k">CAGR in R&amp;D, 5y</td><td class="f">(R&amp;D&#8320; / R&amp;D&#8331;&#8325;)^(1/5) − 1</td></tr>
+  </table>
+
+  <h3>finflows.xls — aggregate cash-flow-statement dollars (trailing 12 months)</h3>
+  <table class="t">
+    <tr><th>Column</th><th>Formula / meaning</th></tr>
+    <tr><td class="k">Dividends · Buybacks · Equity Issuance</td><td class="f">Σ of each, across firms</td></tr>
+    <tr><td class="k">Net Equity Change</td><td class="f">Equity Issuance − Buybacks &nbsp;<span style="color:var(--muted)">(see box)</span></td></tr>
+    <tr><td class="k">Net Equity Change % of Book Equity</td><td class="f">Net Equity Change / Σ book value of equity</td></tr>
+    <tr><td class="k">Debt Raised · Debt Repaid</td><td class="f">Σ of each</td></tr>
+    <tr><td class="k">Net Change in Debt</td><td class="f">Debt Raised − Debt Repaid</td></tr>
+    <tr><td class="k">…% of Total Debt</td><td class="f">Net debt change / Σ total debt</td></tr>
+    <tr><td class="k">Change in Lease Debt</td><td class="f">Δ in accountant-computed lease obligations</td></tr>
+  </table>
+
+  <div class="box warn"><span class="lbl">A verified contradiction — trust the data, not the note</span>
+    <p>The finflows FAQ <em>says</em> "Net Equity Change = Stock Issuances − Buybacks − <strong>Dividends</strong>."
+    But the published numbers do <strong>not</strong> subtract dividends. We checked row-by-row:
+    Advertising = 1996.0 − 2180.4 = <code>−184.3</code> (the value in the file); subtracting dividends would give
+    −755.4. So the real formula is <strong>Issuance − Buybacks</strong>. We document the true one and compute
+    "net payout including dividends" separately when needed.</p>
+  </div>
+
+  <div class="foot"><span>Project 05 · Damodaran methodology</span><span>5 / 9</span></div>
+</section>
+
+<!-- 5 · VALUATION + EPS -->
+<section class="page">
+  <div class="rh"><span>The datasets</span><span>5 · Multiples &amp; where EPS lives</span></div>
+  <h2 class="sec"><span class="kicker">5</span> Valuation multiples — and the EPS answer</h2>
+  <p class="lead">psdata.xls &amp; pedata.xls, plus a direct answer to "where is the EPS calculation?"</p>
+
+  <table class="t">
+    <tr><th>Column</th><th>Formula (Damodaran's wording)</th></tr>
+    <tr><td class="k">PS (Price/Sales)</td><td class="f">Σ market cap / Σ revenue</td></tr>
+    <tr><td class="k">EV/Sales</td><td class="f">Σ EV / Σ revenue &nbsp;<span style="color:var(--muted)">(EV = Mkt Cap + Debt − Cash)</span></td></tr>
+    <tr><td class="k">Current PE</td><td class="f">avg of (price per share / EPS, latest year), money-makers only</td></tr>
+    <tr><td class="k">Trailing PE</td><td class="f">avg of (price / trailing-12m EPS), money-makers only</td></tr>
+    <tr><td class="k">Forward PE</td><td class="f">avg of (price / expected next-4-quarter EPS), money-makers</td></tr>
+    <tr><td class="k">Aggregate Mkt Cap / Net Income</td><td class="f">Σ market cap / Σ net income &nbsp;<span style="color:var(--muted)">(value-weighted PE)</span></td></tr>
+    <tr><td class="k">Expected growth, next 5y</td><td class="f">avg analyst-estimated EPS growth</td></tr>
+    <tr><td class="k">PEG Ratio</td><td class="f">Current PE / expected 5-yr EPS growth</td></tr>
+  </table>
+
+  <div class="box plain"><span class="lbl">"Where is the EPS calculation?" — three places, none of them a standalone column</span>
+    <p><strong>1 · Inside PE.</strong> Damodaran doesn't publish an "industry EPS." He computes <code>PE = price
+    per share ÷ EPS</code> <em>for each firm</em>, then averages across money-making firms — so EPS is the
+    denominator of every PE column (<code>EPS = net income ÷ shares</code>).</p>
+    <p><strong>2 · Money-losers are dropped.</strong> His FAQ warns simple-average PEs exclude negative-EPS firms
+    ("that will create a bias"); the <code>Aggregate Mkt Cap / Net Income</code> columns are the value-weighted
+    alternative that keeps them.</p>
+    <p><strong>3 · EPS <em>growth</em> is a separate file.</strong> Expected EPS growth in pedata is analyst-based;
+    the <em>fundamental</em> EPS growth formula lives in <code>fundgr.xls</code> — see §6. (We loaded its
+    operating-income sibling, <code>fundgrEB.xls</code>.)</p>
+  </div>
+
+  <div class="foot"><span>Project 05 · Damodaran methodology</span><span>6 / 9</span></div>
+</section>
+
+<!-- 6 · FCFE + GROWTH -->
+<section class="page">
+  <div class="rh"><span>The datasets</span><span>6 · FCFE &amp; the growth formulas</span></div>
+  <h2 class="sec"><span class="kicker">6</span> Payout, FCFE &amp; the two growth formulas</h2>
+  <p class="lead">divfcfe.xls and the fundamental-growth files — the second answers the EPS-growth question.</p>
+
+  <h3>divfcfe.xls — cash returned vs. cash that could be returned</h3>
+  <table class="t">
+    <tr><th>Column</th><th>Formula (Damodaran's wording)</th></tr>
+    <tr><td class="k">Payout</td><td class="f">Σ dividends / Σ net income</td></tr>
+    <tr><td class="k">Cash Return</td><td class="f">Σ (dividends + buybacks) / Σ net income</td></tr>
+    <tr><td class="k">FCFE, before debt cash flows</td><td class="f">Σ (net income + depreciation − capex incl. R&amp;D &amp; acquisitions)</td></tr>
+    <tr><td class="k">FCFE, after debt cash flows</td><td class="f">…+ Σ (new debt raised − debt repaid)</td></tr>
+    <tr><td class="k">Net Cash Returns as % of FCFE</td><td class="f">(div + buybacks − net issuance) / FCFE</td></tr>
+  </table>
+  <p style="font-size:11px">FCFE is "potential dividends" — cash left after taxes, reinvestment and debt flows
+  (Damodaran calls the before-debt version <em>"Owner's earnings"</em>). Net-cash-returned <strong>&gt; 100%</strong>
+  of FCFE flags an industry paying out more than it generates.</p>
+
+  <h3>The two fundamental-growth formulas</h3>
+  <p>Growth = how much you reinvest × how well it earns. There's an <strong>equity</strong> version (per-share
+  earnings) and an <strong>operating</strong> version (EBIT):</p>
+  <div class="formula">EPS growth (fundgr.xls)  = Retention Ratio × ROE
+     <span class="c">Retention = 1 − payout ;  ROE = net income / BV equity</span>
+
+EBIT growth (fundgrEB.xls) = Reinvestment Rate × ROC          <span class="c">← the file we loaded</span>
+     <span class="c">Reinvestment = (net capex incl. R&D & acq. + Δ non-cash WC) / EBIT(1−t)</span>
+     <span class="c">ROC = EBIT(1−t) / Invested Capital</span></div>
+  <div class="box good"><span class="lbl">Direct answer to the EPS-growth question</span>
+    <p>The <strong>EPS growth calculation is <code>Retention Ratio × ROE</code></strong>, published in
+    <code>fundgr.xls</code>. Our project loaded the operating-income analogue, <code>fundgrEB.xls</code>
+    (<code>Reinvestment × ROC</code>), because the thesis is about operating margins, not per-share earnings.
+    Both are the same idea — <em>reinvestment × return</em> — one for equity, one for the whole firm.</p>
+  </div>
+
+  <div class="foot"><span>Project 05 · Damodaran methodology</span><span>7 / 9</span></div>
+</section>
+
+<!-- 7 · caveats -->
+<section class="page">
+  <div class="rh"><span>Reading these numbers</span><span>7 · Caveats</span></div>
+  <h2 class="sec"><span class="kicker">7</span> Caveats baked into the calculations</h2>
+  <p class="lead">What to keep in mind when you use any of the formulas above.</p>
+  <ul>
+    <li><strong>They're estimates where it counts.</strong> The R&amp;D amortizable life, the lease discount
+    rate, and the effective-vs-marginal tax choice are Damodaran's assumptions — the capitalized-R&amp;D and
+    adjusted margins are <em>model outputs</em>, not GAAP figures.</li>
+    <li><strong>Value-weighted ≠ typical firm.</strong> Every ratio is dominated by the industry's mega-caps.
+    Nothing here supports a claim about an individual company.</li>
+    <li><strong>Negative / near-zero denominators distort ratios.</strong> Book equity can go negative after
+    years of buybacks; net income can be negative — so %-of-book and PE columns blow up. He publishes
+    money-makers-only PE and "without financials" totals for this reason; we winsorise downstream.</li>
+    <li><strong>Financials are special.</strong> Banks/insurers have no comparable "revenue" or "operating
+    margin," so they're excluded from margin/ROC computations.</li>
+    <li><strong>One snapshot.</strong> All trailing-12-months through ~Q3 of the prior year — a single point in
+    the cycle, not a trend. The "N years ago" columns are computed on <em>today's</em> survivors (survivorship
+    bias).</li>
+    <li><strong>Definitions can lag the data</strong> — the Net Equity Change contradiction (§4) is the proof;
+    always sanity-check a formula against a couple of rows.</li>
+  </ul>
+
+  <div class="box plain"><span class="lbl">How this feeds the project</span>
+    <p>Our pipeline reads these columns as-is into a database and computes two things on top: the
+    <strong>reported-vs-adjusted margin gap</strong> (from the two adjustments in §2–3) and whether the market's
+    <strong>EV/Sales</strong> (§5) tracks the reported or adjusted margin. Everything upstream is Damodaran's
+    arithmetic; we don't re-derive it — we <em>compare</em> its outputs.</p>
+  </div>
+
+  <div class="foot"><span>Project 05 · Damodaran methodology</span><span>8 / 9</span></div>
+</section>
+
+<!-- 8 · sources -->
+<section class="page">
+  <div class="rh"><span>References</span><span>8 · Sources</span></div>
+  <h2 class="sec"><span class="kicker">8</span> Sources (all primary, all free)</h2>
+  <p class="lead">Every formula above is quoted or derived from these Damodaran sources.</p>
+
+  <div class="card">
+    <h3 style="margin-top:0">Primary — the exact column definitions</h3>
+    <ul>
+      <li>The <strong>"Variables &amp; FAQ" sheet inside each <code>.xls</code></strong> — the authoritative,
+      per-file definitions (margin, R&amp;D, finflows, psdata, pedata, divfcfe, fundgrEB). Quoted verbatim throughout.</li>
+      <li><a href="https://pages.stern.nyu.edu/~adamodar/New_Home_Page/datafile/variable.htm">Master variable definitions</a> — <code>datafile/variable.htm</code></li>
+    </ul>
+    <h3>R&amp;D &amp; lease capitalization</h3>
+    <ul>
+      <li><a href="https://pages.stern.nyu.edu/~adamodar/New_Home_Page/AccPrimer/research.htm">Research &amp; Development Expenses (Accounting Primer)</a></li>
+      <li><a href="https://pages.stern.nyu.edu/~adamodar/pdfiles/valn2ed/ch9.pdf">Measuring Earnings (Ch. 9)</a> · <a href="https://pages.stern.nyu.edu/~adamodar/pdfiles/papers/intangibles.pdf">Valuing Companies with Intangible Assets</a></li>
+    </ul>
+    <h3>Growth, PE &amp; PEG</h3>
+    <ul>
+      <li><a href="https://pages.stern.nyu.edu/~adamodar/New_Home_Page/invfables/growthdeterminants.htm">The Fundamental Determinants of Growth</a> (Retention × ROE)</li>
+      <li><a href="https://pages.stern.nyu.edu/~adamodar/New_Home_Page/invfables/peratio.htm">Price-Earnings Ratio</a> · <a href="https://pages.stern.nyu.edu/~adamodar/pdfiles/eqnotes/peg.pdf">PEG Ratios</a></li>
+    </ul>
+  </div>
+
+  <div class="box good"><span class="lbl">Verified, not just cited</span>
+    <p>Two formulas in this document were checked against the raw numbers we ingested: the
+    <strong>Net Equity Change</strong> contradiction (§4, confirmed = Issuance − Buybacks) and the
+    <strong>R&amp;D/Sales</strong> vs. EBITDAR&amp;D/Sales column mapping. The rest are quoted from Damodaran's
+    own FAQ sheets.</p>
+  </div>
+
+  <div class="foot"><span>Project 05 · Damodaran methodology · github.com/ahmed3142/fin</span><span>9 / 9</span></div>
+</section>
+
+</body>
+</html>

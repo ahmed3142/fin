@@ -44,7 +44,8 @@ pre-built, so you can go straight to `sql/postgres/` or Supabase.)
 | **quality** | `src/quality.py` — 94-count, no-Total-rows, referential integrity, firm-count anchor (5,994), anti-circularity lint |
 | **analysis** | `src/analysis.py` — rank-reversal + market-pricing OLS/HC3 (numpy) |
 | **export** | `src/export_postgres.py` → `sql/postgres/{01_schema,02_seed,03_mart_view,04_rls}.sql` + `csv/` |
-| **docs** | [SCHEMA.md](docs/SCHEMA.md) (ERD) · [data_dictionary.md](docs/data_dictionary.md) · [SUPABASE.md](docs/SUPABASE.md) · [**plain-language explainer PDF**](../../docs/pdf/project5-explainer.pdf) (theory + data + simple tech) |
+| **docs** | [SCHEMA.md](docs/SCHEMA.md) (ERD) · [data_dictionary.md](docs/data_dictionary.md) · [SUPABASE.md](docs/SUPABASE.md) |
+| **PDFs** | [**explainer**](../../docs/pdf/project5-explainer.pdf) (theory + data + simple tech) · [**methodology**](../../docs/pdf/project5-methodology.pdf) (Damodaran's exact formulas, from his FAQ sheets) |
 
 ## Load into Supabase
 See [docs/SUPABASE.md](docs/SUPABASE.md) — paste `sql/postgres/01_schema.sql` →
