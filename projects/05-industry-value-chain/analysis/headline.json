@@ -1,0 +1,91 @@
+{
+  "vintage": "2026-01",
+  "caveat": "Value-weighted industry aggregates (n<=94); association, not causation.",
+  "rank_reversal": {
+    "n_industries": 84,
+    "threshold_positions": 5,
+    "n_reranked": 1,
+    "spearman_rho": 0.9981,
+    "biggest_movers": [
+      {
+        "industry": "Recreation",
+        "rank_delta": -7,
+        "adj_minus_reported_margin": -0.0163
+      },
+      {
+        "industry": "Information Services",
+        "rank_delta": 4,
+        "adj_minus_reported_margin": 0.0059
+      },
+      {
+        "industry": "Restaurant/Dining",
+        "rank_delta": -4,
+        "adj_minus_reported_margin": -0.019
+      },
+      {
+        "industry": "Broadcasting",
+        "rank_delta": -3,
+        "adj_minus_reported_margin": 0.0002
+      },
+      {
+        "industry": "Electrical Equipment",
+        "rank_delta": 3,
+        "adj_minus_reported_margin": 0.0042
+      },
+      {
+        "industry": "Real Estate (Development)",
+        "rank_delta": -3,
+        "adj_minus_reported_margin": -0.0033
+      },
+      {
+        "industry": "Telecom (Wireless)",
+        "rank_delta": -3,
+        "adj_minus_reported_margin": -0.0123
+      },
+      {
+        "industry": "Telecom. Equipment",
+        "rank_delta": 3,
+        "adj_minus_reported_margin": 0.0131
+      }
+    ]
+  },
+  "market_pricing": {
+    "EV/Sales": {
+      "reported": {
+        "slope": 20.506,
+        "se": 7.3771,
+        "t": 2.7797,
+        "r2": 0.4055,
+        "n": 84
+      },
+      "adjusted": {
+        "slope": 20.778,
+        "se": 7.2713,
+        "t": 2.8575,
+        "r2": 0.4252,
+        "n": 84
+      },
+      "market_tracks": "adjusted",
+      "n": 84
+    },
+    "P/E": {
+      "reported": {
+        "slope": 176.5411,
+        "se": 126.6206,
+        "t": 1.3943,
+        "r2": 0.0857,
+        "n": 83
+      },
+      "adjusted": {
+        "slope": 157.9685,
+        "se": 109.2254,
+        "t": 1.4463,
+        "r2": 0.07,
+        "n": 83
+      },
+      "market_tracks": "reported",
+      "n": 83
+    }
+  },
+  "headline": "Across 84 non-financial U.S. industries, EV/Sales tracks Damodaran's R&D/lease-ADJUSTED operating margin better than the reported margin (R2 0.4252 vs 0.4055) \u2014 modest evidence the market looks through R&D expensing. The adjustment itself reranks only 1/84 industries by >= 5 places (Spearman rho 0.9981), so the distortion is concentrated in the high-R&D tail, not broad."
+}
