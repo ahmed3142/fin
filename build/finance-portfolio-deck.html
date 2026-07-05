@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Finance Data Portfolio — Four Reproducible Python + DuckDB Projects</title>
+<style>
+  /* ---- palette roles (light mode, reference instance) ---- */
+  :root {
+    --page:        #f9f9f7;
+    --surface:     #fcfcfb;
+    --ink:         #0b0b0b;
+    --ink-2:       #52514e;
+    --muted:       #898781;
+    --grid:        #e1e0d9;
+    --baseline:    #c3c2b7;
+    --border:      rgba(11,11,11,0.10);
+    --blue:        #2a78d6;
+    --aqua:        #1baf7a;
+    --yellow:      #eda100;
+    --green:       #008300;
+  }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: var(--page);
+  }
+  @page { size: 1280px 720px; margin: 0; }
+
+  .slide {
+    width: 1280px; height: 720px;
+    background: var(--page);
+    padding: 48px 56px 40px 56px;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .slide:last-child { page-break-after: auto; }
+
+  /* per-project accents */
+  .p1 { --accent: var(--blue);   --tint: rgba(42,120,214,0.10); }
+  .p2 { --accent: var(--aqua);   --tint: rgba(27,175,122,0.12); }
+  .p3 { --accent: var(--yellow); --tint: rgba(237,161,0,0.14);  }
+  .p4 { --accent: var(--green);  --tint: rgba(0,131,0,0.10);    }
+  .p5 { --accent: #4a3aa7;       --tint: rgba(74,58,167,0.10);  }
+  .p0 { --accent: var(--ink);    --tint: rgba(11,11,11,0.06);   }
+
+  /* ---- header ---- */
+  .head { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 22px; }
+  .accent-bar { width: 6px; align-self: stretch; border-radius: 3px; background: var(--accent); flex: none; }
+  .eyebrow { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0 0 6px 0; }
+  h1 { font-size: 30px; line-height: 1.15; margin: 0; font-weight: 700; letter-spacing: -0.01em; }
+  .subtitle { font-size: 14.5px; color: var(--ink-2); margin: 8px 0 0 0; line-height: 1.45; max-width: 980px; }
+
+  /* ---- stat tiles ---- */
+  .kpi-row { display: flex; gap: 12px; margin-bottom: 18px; }
+  .tile {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px 11px 14px; min-width: 0;
+  }
+  .tile .label { font-size: 10.5px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
+  .tile .value { font-size: 19px; font-weight: 600; margin-top: 4px; color: var(--ink); }
+  .tile .note  { font-size: 10.5px; color: var(--ink-2); margin-top: 3px; line-height: 1.35; }
+  .stars .full  { color: var(--ink-2); }
+  .stars .empty { color: var(--baseline); }
+
+  /* ---- cards & grids ---- */
+  .grid { display: grid; gap: 14px; flex: 1; min-height: 0; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 15px 17px; min-width: 0;
+  }
+  .card h3 {
+    font-size: 11px; letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 9px 0; font-weight: 700;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .card h3::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--accent); flex: none; }
+  .card.nodot h3::before { display: none; }
+
+  ul.compact { margin: 0; padding: 0; list-style: none; }
+  ul.compact li {
+    font-size: 12px; color: var(--ink-2); line-height: 1.42;
+    padding-left: 14px; position: relative; margin-bottom: 6.5px;
+  }
+  ul.compact li:last-child { margin-bottom: 0; }
+  ul.compact li::before { content: "–"; position: absolute; left: 0; color: var(--muted); }
+  ul.compact strong { color: var(--ink); font-weight: 600; }
+
+  ol.qlist { margin: 0; padding: 0; list-style: none; counter-reset: q; }
+  ol.qlist li {
+    counter-increment: q; font-size: 12px; color: var(--ink-2); line-height: 1.42;
+    margin-bottom: 8px; padding-left: 28px; position: relative;
+  }
+  ol.qlist li:last-child { margin-bottom: 0; }
+  ol.qlist li::before {
+    content: counter(q); position: absolute; left: 0; top: 0.5px;
+    width: 19px; height: 19px; border-radius: 6px; background: var(--tint);
+    color: var(--ink); font-size: 10.5px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  ol.qlist strong { color: var(--ink); font-weight: 600; }
+
+  .quote {
+    font-size: 13.5px; color: var(--ink-2); line-height: 1.5;
+    border-left: 3px solid var(--accent); padding: 2px 0 2px 13px; margin: 0;
+  }
+  .quote strong { color: var(--ink); font-weight: 600; }
+
+  /* ---- mini table ---- */
+  table.mini { width: 100%; border-collapse: collapse; font-size: 11px; }
+  table.mini th {
+    text-align: left; font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700; padding: 0 8px 6px 0; border-bottom: 1px solid var(--grid);
+  }
+  table.mini td {
+    padding: 6px 8px 6px 0; border-bottom: 1px solid var(--grid);
+    color: var(--ink-2); vertical-align: top; line-height: 1.35;
+  }
+  table.mini tr:last-child td { border-bottom: none; }
+  table.mini td.src { color: var(--ink); font-weight: 600; white-space: nowrap; }
+  table.mini .warn { color: var(--ink-2); }
+  table.mini .warn::before { content: "⚠ "; color: var(--muted); }
+
+  /* ---- pipeline steps ---- */
+  .steps { display: flex; flex-direction: column; gap: 7px; }
+  .step { display: flex; gap: 9px; align-items: flex-start; }
+  .step .n {
+    flex: none; width: 19px; height: 19px; border-radius: 50%;
+    background: var(--tint); color: var(--ink); font-size: 10.5px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .step .t { font-size: 12px; color: var(--ink-2); line-height: 1.4; }
+  .step .t strong { color: var(--ink); font-weight: 600; }
+
+  /* ---- chips ---- */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font-size: 11px; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px 4px 8px;
+    display: inline-flex; align-items: center; gap: 6px; font-weight: 500;
+  }
+  .chip::before { content: ""; width: 7px; height: 7px; border-radius: 2px; background: var(--accent); }
+  .chip.plain::before { background: var(--baseline); }
+
+  /* ---- footer ---- */
+  .foot {
+    position: absolute; bottom: 0; left: 56px; right: 56px; height: 34px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px; color: var(--muted); border-top: 1px solid var(--grid);
+  }
+
+  /* ---- title slide ---- */
+  .title-slide { justify-content: center; }
+  .title-slide .brand { font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 20px; }
+  .title-slide h1 { font-size: 52px; letter-spacing: -0.02em; max-width: 900px; }
+  .title-slide .sub { font-size: 17px; color: var(--ink-2); margin: 18px 0 0 0; line-height: 1.55; max-width: 860px; }
+  .proj-cards { display: flex; gap: 12px; margin-top: 40px; }
+  .proj-card {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px; border-top: 4px solid var(--accent);
+  }
+  .proj-card .num { font-size: 10.5px; color: var(--muted); font-weight: 700; letter-spacing: 0.1em; }
+  .proj-card .name { font-size: 14.5px; font-weight: 650; margin-top: 3px; line-height: 1.25; }
+  .proj-card .desc { font-size: 11px; color: var(--ink-2); margin-top: 5px; line-height: 1.4; }
+  .stack-row { display: flex; gap: 8px; margin-top: 34px; flex-wrap: wrap; }
+  .stack-row .chip { font-size: 11.5px; }
+
+  /* ---- overview table ---- */
+  table.ov { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.ov th {
+    text-align: left; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); font-weight: 700; padding: 0 10px 7px 0; border-bottom: 1px solid var(--grid);
+  }
+  table.ov td { padding: 9px 10px 9px 0; border-bottom: 1px solid var(--grid); color: var(--ink-2); vertical-align: top; line-height: 1.35; }
+  table.ov tr:last-child td { border-bottom: none; }
+  table.ov .pname { color: var(--ink); font-weight: 650; white-space: nowrap; }
+  table.ov .nowrap { white-space: nowrap; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 7px; vertical-align: 0; }
+
+  /* ---- effort range chart ---- */
+  .chart { margin-top: 2px; }
+  .crow { display: grid; grid-template-columns: 118px 1fr; gap: 10px; align-items: center; margin-bottom: 11px; }
+  .crow .cname { font-size: 11px; color: var(--ink-2); font-weight: 600; text-align: right; line-height: 1.2; }
+  .ctrack { position: relative; height: 14px; }
+  .ctrack .rail { position: absolute; left: 0; right: 0; top: 6px; height: 2px; background: var(--grid); border-radius: 1px; }
+  .ctrack .range { position: absolute; top: 0; height: 14px; border-radius: 4px; }
+  .ctrack .vlabel { position: absolute; top: -1px; font-size: 10.5px; color: var(--ink-2); font-weight: 600; white-space: nowrap; }
+  .caxis { display: grid; grid-template-columns: 118px 1fr; gap: 10px; margin-top: 2px; }
+  .caxis .ticks { position: relative; height: 14px; border-top: 1px solid var(--baseline); }
+  .caxis .tick { position: absolute; top: 2px; font-size: 9.5px; color: var(--muted); transform: translateX(-50%); }
+
+  .flow { display: flex; align-items: stretch; gap: 8px; }
+  .fnode {
+    flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 12px; border-top: 3px solid var(--accent);
+  }
+  .fnode .fn { font-size: 12px; font-weight: 650; }
+  .fnode .fd { font-size: 10.5px; color: var(--ink-2); margin-top: 3px; line-height: 1.35; }
+  .farrow { align-self: center; color: var(--baseline); font-size: 16px; flex: none; }
+
+  .pillars { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .pillar { background: var(--tint); border-radius: 10px; padding: 11px 13px; }
+  .pillar .pt { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
+  .pillar .pd { font-size: 11px; color: var(--ink-2); margin-top: 4px; line-height: 1.4; }
+
+  .callout {
+    background: var(--tint); border-radius: 10px; padding: 11px 14px;
+    font-size: 12px; color: var(--ink-2); line-height: 1.45;
+  }
+  .callout strong { color: var(--ink); font-weight: 650; }
+</style>
+</head>
+<body>
+
+<!-- ============ SLIDE 1 — TITLE ============ -->
+<section class="slide title-slide p0">
+  <div class="brand">Finance data portfolio · project proposals</div>
+  <h1>Five reproducible finance analytics projects</h1>
+  <p class="sub">A portfolio built on <strong>Python + DuckDB</strong> pipelines over free, adversarially-verified data sources —
+  from a formal COVID event study to a vulnerability-adjusted vendor scorecard. Every number traceable to a primary-source
+  filing, government record, or pinned public dataset. Project 5 is <strong>built &amp; runnable</strong>.</p>
+  <div class="proj-cards">
+    <div class="proj-card p1">
+      <div class="num">PROJECT 01</div>
+      <div class="name">Post-COVID Sector Rotation</div>
+      <div class="desc">Event study &amp; macro linkage across the 11 U.S. equity sectors, 2019–2025.</div>
+    </div>
+    <div class="proj-card p2">
+      <div class="num">PROJECT 02</div>
+      <div class="name">Luxury Goods Comps</div>
+      <div class="desc">Market share, margins &amp; valuation multiples across the listed global luxury houses.</div>
+    </div>
+    <div class="proj-card p3">
+      <div class="num">PROJECT 03</div>
+      <div class="name">Fortune 500 Breakdowns</div>
+      <div class="desc">A multi-year panel of corporate America — profitability, efficiency, churn.</div>
+    </div>
+    <div class="proj-card p4">
+      <div class="num">PROJECT 04</div>
+      <div class="name">Cloud, ERP &amp; AI Vendor Intelligence</div>
+      <div class="desc">Segment revenue vs. security-risk exposure — finance × cybersecurity.</div>
+    </div>
+    <div class="proj-card p5">
+      <div class="num">PROJECT 05</div>
+      <div class="name">Industry Value-Chain</div>
+      <div class="desc">Margin-distortion across 94 U.S. industries — Damodaran datasets → Supabase.</div>
+    </div>
+  </div>
+  <div class="stack-row">
+    <span class="chip plain">Python</span><span class="chip plain">DuckDB</span><span class="chip plain">Parquet caching</span>
+    <span class="chip plain">pandera quality gates</span><span class="chip plain">Streamlit dashboards</span>
+    <span class="chip plain">pytest</span><span class="chip plain">GitHub Actions CI</span>
+  </div>
+  <div class="foot"><span>Finance Data Portfolio</span><span>1 / 14</span></div>
+</section>
+
+<!-- ============ SLIDE 2 — PORTFOLIO AT A GLANCE ============ -->
+<section class="slide p0">
+  <div class="head">
+    <div class="accent-bar"></div>
+    <div>
+      <p class="eyebrow">Portfolio overview</p>
+      <h1>Five projects, one engineering spine</h1>
+      <p class="subtitle">Each project stands alone, but they share a reusable toolkit — a cached ingestion layer, a layered DuckDB warehouse, quality gates, and CI — so effort compounds across the sequence.</p>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1.45fr 1fr;">
+    <div class="card nodot">
+      <h3>The lineup</h3>
+      <table class="ov">
+        <tr><th></th><th>Angle</th><th>Difficulty</th><th>Effort</th><th>Data</th><th>Role</th></tr>
+        <tr>
+          <td class="pname"><span class="dot" style="background:var(--blue)"></span>01 Sector Rotation</td>
+          <td>Event study + macro linkage</td><td>Interm.→Adv.</td><td class="nowrap">~50–70&thinsp;h</td>
+          <td class="stars"><span class="full">★★★★★</span></td><td><strong style="color:var(--ink)">Flagship</strong> — best effort-to-impressiveness</td>
+        </tr>
+        <tr>
+          <td class="pname"><span class="dot" style="background:var(--aqua)"></span>02 Luxury Comps</td>
+          <td>Comps, multiples, market share</td><td>Interm.→Adv.</td><td class="nowrap">~60–90&thinsp;h</td>
+          <td class="stars"><span class="full">★★★</span><span class="empty">★★</span></td><td>Most <strong style="color:var(--ink)">finance-recruiter</strong> appeal</td>
+        </tr>
+        <tr>
+          <td class="pname"><span class="dot" style="background:var(--yellow)"></span>03 Fortune 500</td>
+          <td>Panel data engineering</td><td>Intermediate</td><td class="nowrap">~40–70&thinsp;h</td>
+          <td class="stars"><span class="full">★★★★</span><span class="empty">★</span></td><td><strong style="color:var(--ink)">Quick win</strong> — builds the shared toolkit</td>
+        </tr>
+        <tr>
+          <td class="pname"><span class="dot" style="background:var(--green)"></span>04 Vendor Intel</td>
+          <td>Finance × cybersecurity</td><td>Advanced</td><td class="nowrap">~60–90&thinsp;h</td>
+          <td class="stars"><span class="full">★★★</span><span class="empty">★★</span></td><td><strong style="color:var(--ink)">Capstone</strong> — most differentiated</td>
+        </tr>
+        <tr>
+          <td class="pname"><span class="dot" style="background:#4a3aa7"></span>05 Industry Value-Chain</td>
+          <td>Entity resolution, margins vs valuation</td><td>Advanced</td><td class="nowrap">~55–80&thinsp;h</td>
+          <td class="stars"><span class="full">★★★★</span><span class="empty">★</span></td><td><strong style="color:var(--ink)">Built</strong> — runnable + Postgres DB</td>
+        </tr>
+      </table>
+    </div>
+    <div class="card nodot">
+      <h3>Estimated effort (hours)</h3>
+      <div class="chart">
+        <div class="crow"><div class="cname">01 Sector Rotation</div>
+          <div class="ctrack"><div class="rail"></div><div class="range" style="left:50%;width:20%;background:var(--blue)"></div><div class="vlabel" style="left:72%">50–70&thinsp;h</div></div></div>
+        <div class="crow"><div class="cname">02 Luxury Comps</div>
+          <div class="ctrack"><div class="rail"></div><div class="range" style="left:60%;width:30%;background:var(--aqua)"></div><div class="vlabel" style="left:92%">60–90&thinsp;h</div></div></div>
+        <div class="crow"><div class="cname">03 Fortune 500</div>
+          <div class="ctrack"><div class="rail"></div><div class="range" style="left:40%;width:30%;background:var(--yellow)"></div><div class="vlabel" style="left:72%">40–70&thinsp;h</div></div></div>
+        <div class="crow"><div class="cname">04 Vendor Intel</div>
+          <div class="ctrack"><div class="rail"></div><div class="range" style="left:60%;width:30%;background:var(--green)"></div><div class="vlabel" style="left:92%">60–90&thinsp;h</div></div></div>
+        <div class="crow"><div class="cname">05 Industry Value-Chain</div>
+          <div class="ctrack"><div class="rail"></div><div class="range" style="left:55%;width:25%;background:#4a3aa7"></div><div class="vlabel" style="left:82%">55–80&thinsp;h</div></div></div>
+        <div class="caxis"><div></div>
+          <div class="ticks">
+            <span class="tick" style="left:0%">0</span><span class="tick" style="left:25%">25</span>
+            <span class="tick" style="left:50%">50</span><span class="tick" style="left:75%">75</span>
+            <span class="tick" style="left:100%">100</span>
+          </div>
+        </div>
+      </div>
+      <div class="callout" style="margin-top:14px; background:rgba(11,11,11,0.05)">
+        Range = documented estimate per project brief. Luxury and Vendor Intel run longer because PDF extraction and CVE attribution are manual-judgment work.
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:14px">
+    <div class="card nodot" style="padding:13px 17px">
+      <h3>Recommended build order</h3>
+      <div class="flow">
+        <div class="fnode p3"><div class="fn">1 · Fortune 500</div><div class="fd">Approachable data; builds the DuckDB warehouse, SEC client &amp; yfinance caching reused everywhere.</div></div>
+        <div class="farrow">→</div>
+        <div class="fnode p1"><div class="fn">2 · Sector Rotation</div><div class="fd">The flagship — cleanest free data, real quant methodology (event study, CARs, t-tests).</div></div>
+        <div class="farrow">→</div>
+        <div class="fnode p2"><div class="fn">3 · Luxury Comps</div><div class="fd">Sell-side-style comps work: IFRS/GAAP normalization, crosswalks, valuation vs. fundamentals.</div></div>
+        <div class="farrow">→</div>
+        <div class="fnode p4"><div class="fn">4 · Vendor Intel</div><div class="fd">Advanced capstone with the highest ceiling — a rare finance × security combination.</div></div>
+        <div class="farrow">→</div>
+        <div class="fnode p5"><div class="fn">5 · Industry Value-Chain</div><div class="fd">Damodaran capstone — the join + one honest thesis; ships a Supabase Postgres DB.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Finance Data Portfolio — Overview</span><span>2 / 14</span></div>
+</section>
+
+<!-- ============ SLIDE 3 — P1 PITCH ============ -->
+<section class="slide p1">
+  <div class="head">
+    <div class="accent-bar"></div>
+    <div>
+      <p class="eyebrow">Project 01 · Flagship</p>
+      <h1>Post-COVID Sector Rotation</h1>
+      <p class="subtitle">An event-study and macro-linkage analysis of U.S. equity sectors, 2019–2025 — how the 11 sectors crashed, recovered, and structurally re-ranked through COVID-19.</p>
+    </div>
+  </div>
+  <div class="kpi-row">
+    <div class="tile"><div class="label">Difficulty</div><div class="value">Interm. → Adv.</div><div class="note">Real quant methodology</div></div>
+    <div class="tile"><div class="label">Effort</div><div class="value">~50–70 h</div><div class="note">Best effort-to-impressiveness ratio</div></div>
+    <div class="tile"><div class="label">Data cleanliness</div><div class="value stars"><span class="full">★★★★★</span></div><div class="note">Fully automatable, no PDFs</div></div>
+    <div class="tile"><div class="label">Universe</div><div class="value">11 ETFs + SPY</div><div class="note">XLK, XLF, XLE, XLV, XLY, XLP, XLI, XLU, XLB, XLRE, XLC</div></div>
+    <div class="tile"><div class="label">Window</div><div class="value">2019 → 2025</div><div class="note">Daily prices · 8 macro series · stringency</div></div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1.05fr 1fr;">
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>The interview story</h3>
+        <p class="quote">“I ran a formal <strong>market-model event study</strong> of the COVID crash across all 11 GICS sectors, measured <strong>cumulative abnormal returns vs. the S&amp;P 500</strong> over a 250-day estimation window, and showed which sectors were structural losers vs. winners — then linked recovery speed to sector-specific macro damage and the pandemic stringency timeline.”</p>
+      </div>
+      <div class="card">
+        <h3>Three analytical layers</h3>
+        <div class="pillars">
+          <div class="pillar"><div class="pt">1 · Descriptive</div><div class="pd">Returns, rolling vol, max drawdown, recovery time, Sharpe/Sortino, correlation regimes.</div></div>
+          <div class="pillar"><div class="pt">2 · Event study</div><div class="pd">CARs vs. market-model expectation around 19 Feb → 23 Mar 2020; t-tested significance.</div></div>
+          <div class="pillar"><div class="pt">3 · Macro linkage</div><div class="pd">FRED macro + daily VIX + stringency; regress recovery speed on macro damage.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Key analytical questions</h3>
+      <ol class="qlist">
+        <li>Which sector had the <strong>deepest drawdown</strong> — and does that ranking match the ranking by <strong>recovery time</strong>?</li>
+        <li>Which sectors show statistically significant negative CARs (Energy, Financials?) vs. positive (Tech, Staples?) — and does the sign <strong>flip in the 2021–22 inflation regime</strong>?</li>
+        <li>Did cross-sector correlations <strong>spike toward 1.0</strong> in the March-2020 panic — “diversification fails when you need it”?</li>
+        <li>Which sectors carried the highest <strong>VIX beta</strong> during the shock, and how long did volatility take to normalize?</li>
+        <li>Comparing 2019 vs. 2023–25 leadership: which sectors <strong>permanently re-ranked</strong> vs. mean-reverted?</li>
+      </ol>
+    </div>
+  </div>
+  <div class="foot"><span>Project 01 · Post-COVID Sector Rotation</span><span>3 / 14</span></div>
+</section>
+
+<!-- ============ SLIDE 4 — P1 DATA & METHOD ============ -->
+<section class="slide p1">
+  <div class="head">
+    <div class="accent-bar"></div>
+    <div>
+      <p class="eyebrow">Project 01 · Data &amp; method</p>
+      <h1>Sector Rotation — pipeline, data, risks</h1>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1.15fr 1fr;">
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>Verified data sources</h3>
+        <table class="mini">
+          <tr><th>Source</th><th>Role</th><th>Access</th></tr>
+          <tr><td class="src">yfinance / Stooq readers</td><td>Primary price panel — returns, vol, drawdowns, abnormal returns</td><td>No key; fetch once, cache to Parquet</td></tr>
+          <tr><td class="src">FRED</td><td>VIXCLS, UNRATE, INDPRO, CPI, sector payrolls — macro linkage &amp; VIX beta</td><td>Free 32-char API key</td></tr>
+          <tr><td class="src">Our World in Data</td><td>COVID stringency + case/death waves overlay</td><td class="warn">Frozen 19 Aug 2024 — scope overlay to ≤2024</td></tr>
+          <tr><td class="src">Oxford OxCGRT</td><td>Containment vs. economic-support sub-indices (optional)</td><td>Direct CSV, no key</td></tr>
+          <tr><td class="src">BLS / BEA</td><td>Industry payrolls; GDP-by-industry “markets lead the economy” (optional)</td><td>Free instant keys</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Flagship visuals</h3>
+        <div class="chips">
+          <span class="chip">Drawdown vs. days-to-recover ranking</span>
+          <span class="chip">CAR paths, significance-flagged</span>
+          <span class="chip">Correlation-regime heatmaps</span>
+          <span class="chip">Rolling-vol small multiples</span>
+          <span class="chip">VIX-beta ranked bar</span>
+          <span class="chip">2019 vs. 2025 leadership bump chart</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>Methodology</h3>
+        <div class="steps">
+          <div class="step"><div class="n">1</div><div class="t"><strong>Ingest once, cache to Parquet</strong> — prices, FRED, OWID; retry/back-off.</div></div>
+          <div class="step"><div class="n">2</div><div class="t">Land raw in <strong>DuckDB</strong>; staging computes returns, aligns calendars.</div></div>
+          <div class="step"><div class="n">3</div><div class="t"><strong>Descriptive marts</strong> — vol, drawdown, recovery, Sharpe, correlations.</div></div>
+          <div class="step"><div class="n">4</div><div class="t"><strong>Event study</strong> — per-sector α, β over 250 pre-event days; CARs + t-tests.</div></div>
+          <div class="step"><div class="n">5</div><div class="t"><strong>Macro linkage</strong> — explicit resampling; VIX betas; recovery regressions.</div></div>
+          <div class="step"><div class="n">6</div><div class="t">pandera gates → figures → <strong>Streamlit</strong> → pytest + CI → findings README.</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Risks &amp; gotchas</h3>
+        <ul class="compact">
+          <li><strong>Stooq CSV sits behind a JS anti-bot wall</strong> — use library fetchers + cache, never naive requests.</li>
+          <li><strong>yfinance is fragile</strong> (HTTP 429) — fetch once, cache, retry; never depend on it live.</li>
+          <li><strong>Frequency mismatch</strong> (daily / monthly / quarterly) is the main analytical trap — resample explicitly.</li>
+          <li>Event-study validity needs a <strong>clean 2019 estimation window</strong>; frame macro results as associations, not causation.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Project 01 · Post-COVID Sector Rotation</span><span>4 / 14</span></div>
+</section>
+
+<!-- ============ SLIDE 5 — P2 PITCH ============ -->
+<section class="slide p2">
+  <div class="head">
+    <div class="accent-bar"></div>
+    <div>
+      <p class="eyebrow">Project 02 · Recruiter appeal</p>
+      <h1>Luxury Goods Market Share &amp; Valuation</h1>
+      <p class="subtitle">A comps model benchmarking the listed global luxury houses — LVMH, Kering, Richemont, Hermès, Burberry, Prada, Brunello Cucinelli, Estée Lauder, Tapestry, Capri — on share, mix, margins, and multiples.</p>
+    </div>
+  </div>
+  <div class="kpi-row">
+    <div class="tile"><div class="label">Difficulty</div><div class="value">Interm. → Adv.</div><div class="note">Real sell-side analyst work</div></div>
+    <div class="tile"><div class="label">Effort</div><div class="value">~60–90 h</div><div class="note">PDF extraction is the slow part</div></div>
+    <div class="tile"><div class="label">Data cleanliness</div><div class="value stars"><span class="full">★★★</span><span class="empty">★★</span></div><div class="note">Filings PDFs need hand-mapping</div></div>
+    <div class="tile"><div class="label">Universe</div><div class="value">Listed peer set</div><div class="note">IFRS + US GAAP · EUR/CHF/GBP/USD</div></div>
+    <div class="tile"><div class="label">Window</div><div class="value">FY2015 → 2024</div><div class="note">Annual, from primary filings</div></div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1.05fr 1fr;">
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>The interview story</h3>
+        <p class="quote">“I built a comps model across the listed global luxury houses — normalizing <strong>IFRS vs. US-GAAP</strong> filings and four currencies, hand-mapping each house’s segment and geographic taxonomy into a common schema, then benchmarking margins and <strong>EV/EBITDA, EV/Sales and P/E vs. Damodaran</strong> industry averages to flag who’s expensive for their fundamentals. Hermès’s structural margin premium shows up cleanly.”</p>
+      </div>
+      <div class="card">
+        <h3>Four pillars</h3>
+        <div class="pillars" style="grid-template-columns:1fr 1fr;">
+          <div class="pillar"><div class="pt">Market share &amp; HHI</div><div class="pd">Revenue share <em>within the listed peer set</em> — reproducible from primary filings.</div></div>
+          <div class="pillar"><div class="pt">Revenue mix</div><div class="pd">Segment &amp; geography, hand-mapped to a common schema across houses.</div></div>
+          <div class="pillar"><div class="pt">Financial performance</div><div class="pd">3/5/10-yr CAGRs, gross/op/net margins, currency-normalized to EUR &amp; USD.</div></div>
+          <div class="pillar"><div class="pt">Valuation</div><div class="pd">EV/Sales, EV/EBITDA, P/E vs. Damodaran; valuation-vs-fundamentals scatters.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Key analytical questions</h3>
+      <ol class="qlist">
+        <li>How has <strong>peer-set HHI</strong> evolved 2015–2024 — did the 2024 downturn consolidate or fragment share?</li>
+        <li>Which <strong>segment mix</strong> proved most resilient through the 2024 contraction?</li>
+        <li>Geographic exposure: who is most exposed to the <strong>China slowdown</strong> vs. Japan/US strength?</li>
+        <li>Does <strong>Hermès’s structural margin premium</strong> show cleanly vs. Damodaran’s apparel average?</li>
+        <li>Do multiples rank houses the same way growth and margins do — <strong>who’s expensive for their fundamentals</strong>?</li>
+        <li>Where do yfinance fundamentals <strong>diverge from SEC EDGAR</strong> ground truth for the US filers?</li>
+      </ol>
+    </div>
+  </div>
+  <div class="foot"><span>Project 02 · Luxury Goods Comps</span><span>5 / 14</span></div>
+</section>
+
+<!-- ============ SLIDE 6 — P2 DATA & METHOD ============ -->
+<section class="slide p2">
+  <div class="head">
+    <div class="accent-bar"></div>
+    <div>
+      <p class="eyebrow">Project 02 · Data &amp; method</p>
+      <h1>Luxury Comps — pipeline, data, risks</h1>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1.15fr 1fr;">
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>Verified data sources</h3>
+        <table class="mini">
+          <tr><th>Source</th><th>Role</th><th>Access</th></tr>
+          <tr><td class="src">SEC EDGAR XBRL</td><td>Ground-truth financials for US filers (EL, TPR, CPRI); reconciliation benchmark</td><td>No key; User-Agent header; 10 req/s</td></tr>
+          <tr><td class="src">Company URDs / annual reports</td><td><strong>Primary segment &amp; geographic revenue</strong> for all houses (IFRS filers absent from EDGAR)</td><td class="warn">PDFs; taxonomies differ → crosswalk table</td></tr>
+          <tr><td class="src">yfinance</td><td>Prices, market cap, EV inputs for multiples</td><td class="warn">Non-US fundamentals often empty — prices only</td></tr>
+          <tr><td class="src">Damodaran (NYU Stern)</td><td>Industry-average margins &amp; multiples benchmark</td><td class="warn">URLs overwritten each January — pin file + date</td></tr>
+          <tr><td class="src">Bain × Altagamma</td><td>Total-market denominator &amp; narrative context</td><td>Free headline figures (full decks gated)</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Flagship visuals</h3>
+        <div class="chips">
+          <span class="chip">Market-share explorer + HHI trend</span>
+          <span class="chip">Segment-mix stacked bars</span>
+          <span class="chip">Geographic-exposure view</span>
+          <span class="chip">Margin ladder w/ Damodaran markers</span>
+          <span class="chip">Valuation-vs-fundamentals scatter</span>
+          <span class="chip">yfinance-vs-EDGAR variance panel</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>Methodology</h3>
+        <div class="steps">
+          <div class="step"><div class="n">1</div><div class="t">Ingest EDGAR XBRL, URD PDFs, yfinance prices, Damodaran — cache all raw.</div></div>
+          <div class="step"><div class="n">2</div><div class="t"><strong>Hand-map each house’s segment &amp; geo taxonomy</strong> into a common schema — a documented crosswalk, itself a defensible artifact.</div></div>
+          <div class="step"><div class="n">3</div><div class="t"><strong>Currency-normalize</strong> to EUR &amp; USD; align March fiscal year-ends (Richemont, Burberry).</div></div>
+          <div class="step"><div class="n">4</div><div class="t">Marts: revenue share, HHI, CAGRs, margins, EV/Sales, EV/EBITDA, P/E.</div></div>
+          <div class="step"><div class="n">5</div><div class="t">Benchmark vs. Damodaran; <strong>reconcile yfinance vs. EDGAR</strong> and quantify variance.</div></div>
+          <div class="step"><div class="n">6</div><div class="t">pandera gates → multi-page Streamlit → pytest over every formula → CI.</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Risks &amp; gotchas</h3>
+        <ul class="compact">
+          <li><strong>Taxonomies differ materially</strong> (LVMH groups vs. Kering tiers vs. Richemont maisons) — treat the crosswalk as a transparent, first-class artifact.</li>
+          <li><strong>EDGAR covers only US filers</strong> — European/Asian financials come from PDFs (manual).</li>
+          <li>FX convention (spot vs. average) is an <strong>analyst choice — document it</strong>.</li>
+          <li>Don’t scrape Statista/Macrotrends; note corporate actions (Prada–Versace, Capri/Tapestry) so comps aren’t distorted.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Project 02 · Luxury Goods Comps</span><span>6 / 14</span></div>
+</section>
+
+<!-- ============ SLIDE 7 — P3 PITCH ============ -->
+<section class="slide p3">
+  <div class="head">
+    <div class="accent-bar"></div>
+    <div>
+      <p class="eyebrow">Project 03 · Quick win — start here</p>
+      <h1>Fortune 500 Financial Breakdowns</h1>
+      <p class="subtitle">A multi-year DuckDB panel of corporate America’s largest firms — sector profitability, revenue-per-employee efficiency, geographic concentration, and year-over-year list churn.</p>
+    </div>
+  </div>
+  <div class="kpi-row">
+    <div class="tile"><div class="label">Difficulty</div><div class="value">Intermediate</div><div class="note">Best pure data-engineering showcase</div></div>
+    <div class="tile"><div class="label">Effort</div><div class="value">~40–70 h</div><div class="note">Most approachable data</div></div>
+    <div class="tile"><div class="label">Data cleanliness</div><div class="value stars"><span class="full">★★★★</span><span class="empty">★</span></div><div class="note">Community CSVs</div></div>
+    <div class="tile"><div class="label">Panel size</div><div class="value">~5,000 rows</div><div class="note">~10 years × 500 companies</div></div>
+    <div class="tile"><div class="label">Deliverable</div><div class="value">make pipeline</div><div class="note">Reproducible on a fresh clone, free data only</div></div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1.05fr 1fr;">
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>The interview story</h3>
+        <p class="quote">“I engineered a reproducible <strong>DuckDB warehouse over ~10 years of Fortune 500 data</strong>, then showed that tech and pharma dominate margins while retail dominates headcount, that <strong>revenue-per-employee varies ~20× across sectors</strong>, and that ~3–5% of the list turns over annually with churn concentrated in energy and retail.”</p>
+      </div>
+      <div class="card">
+        <h3>Core deliverable = the data engineering</h3>
+        <ul class="compact">
+          <li>Canonical schema at company-year grain: rank, revenue, profit, assets, employees, sector, HQ + derived <strong>net margin, revenue-per-employee, rank change</strong>.</li>
+          <li><strong>Cross-year entity resolution</strong> — track firms through rebrands and M&amp;A via a documented alias/override table.</li>
+          <li>Fact/dimension model + <strong>SQL window functions</strong> for churn flags and rank movement.</li>
+          <li>Quality gates: exactly 500 ranks/year, non-null keys, non-negative financials.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Key analytical questions</h3>
+      <ol class="qlist">
+        <li><strong>Does size predict profitability?</strong> Or does net margin decouple from scale, overall and by sector?</li>
+        <li>Which sectors are most/least profitable (median margin, ROA) — and how have rankings shifted YoY?</li>
+        <li>How does <strong>revenue-per-employee</strong> vary — which industries are the ~20× outliers?</li>
+        <li>How concentrated is the list (top-10/25/50 share, HHI) and <strong>where is corporate America headquartered</strong>?</li>
+        <li><strong>How churny is the list?</strong> Entry/exit rates, sector churn as a disruption proxy, survival of former top-100 firms.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="foot"><span>Project 03 · Fortune 500 Breakdowns</span><span>7 / 14</span></div>
+</section>
+
+<!-- ============ SLIDE 8 — P3 DATA & METHOD ============ -->
+<section class="slide p3">
+  <div class="head">
+    <div class="accent-bar"></div>
+    <div>
+      <p class="eyebrow">Project 03 · Data &amp; method</p>
+      <h1>Fortune 500 — pipeline, data, risks</h1>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1.15fr 1fr;">
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>Verified data sources</h3>
+        <table class="mini">
+          <tr><th>Source</th><th>Role</th><th>Access</th></tr>
+          <tr><td class="src">cmusam/fortune500 (GitHub)</td><td>Longitudinal spine → base fact table, company-year grain</td><td class="warn">Per-year files 2005–2019 (combined CSV 404s) — pin commit SHA, mirror raw</td></tr>
+          <tr><td class="src">Kaggle datasets</td><td>Enrichment: sector, industry, HQ, employees, market cap</td><td>Free token; prefer CC0/CC BY; pin slug + version</td></tr>
+          <tr><td class="src">Wikipedia</td><td>Current-year refresh &amp; cross-check (~top 100)</td><td>pandas.read_html, set a User-Agent</td></tr>
+          <tr><td class="src">SEC EDGAR XBRL</td><td>Validation layer: audited revenue/income/assets for public filers</td><td>No key; User-Agent header required</td></tr>
+          <tr><td class="src">Damodaran (NYU Stern)</td><td>Industry benchmark margins/ROC for context</td><td>Direct .xls; taxonomy mapping needed</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Flagship visuals</h3>
+        <div class="chips">
+          <span class="chip">Size-vs-margin scatter</span>
+          <span class="chip">Sector profitability boxplots</span>
+          <span class="chip">Revenue-per-employee ranked bars</span>
+          <span class="chip">Concentration &amp; HHI trends</span>
+          <span class="chip">US-state HQ choropleth</span>
+          <span class="chip">Churn stacked bars + rank bump chart</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>Methodology</h3>
+        <div class="steps">
+          <div class="step"><div class="n">1</div><div class="t">Typed config with <strong>pinned SHAs/versions</strong>; ingest and cache all raw sources.</div></div>
+          <div class="step"><div class="n">2</div><div class="t">Land raw verbatim in DuckDB with source + ingestion lineage.</div></div>
+          <div class="step"><div class="n">3</div><div class="t">Normalize names, types, <strong>units to USD millions</strong>, sector labels, HQ fields.</div></div>
+          <div class="step"><div class="n">4</div><div class="t"><strong>Cross-year entity resolution</strong> → stable company_id via alias table.</div></div>
+          <div class="step"><div class="n">5</div><div class="t">Marts: fact_company_year + dim_company; window functions for churn &amp; rank change.</div></div>
+          <div class="step"><div class="n">6</div><div class="t">Quality gates → 8 analyses → Streamlit + pytest + CI + data dictionary.</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Risks &amp; gotchas</h3>
+        <ul class="compact">
+          <li>Fortune rankings are <strong>proprietary editorial data</strong> — community CSVs are reproductions; cite them as such.</li>
+          <li><strong>URLs drift/404</strong> — pin commit SHA / dataset version and mirror raw files into the repo.</li>
+          <li>Employees/sector/HQ columns are <strong>inconsistent across years</strong>; fiscal conventions won’t tie exactly to SEC.</li>
+          <li>Nominal dollars — <strong>deflate with CPI</strong> before making trend claims.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Project 03 · Fortune 500 Breakdowns</span><span>8 / 14</span></div>
+</section>
+
+<!-- ============ SLIDE 9 — P4 PITCH ============ -->
+<section class="slide p4">
+  <div class="head">
+    <div class="accent-bar"></div>
+    <div>
+      <p class="eyebrow">Project 04 · Advanced capstone</p>
+      <h1>Cloud, ERP &amp; AI Vendor Intelligence</h1>
+      <p class="subtitle">Segment revenue, implied market position, and security-risk exposure — fusing SEC filings, developer-adoption signals, and the NVD/CISA vulnerability record across ~10 enterprise-tech vendors.</p>
+    </div>
+  </div>
+  <div class="kpi-row">
+    <div class="tile"><div class="label">Difficulty</div><div class="value">Advanced</div><div class="note">Highest ceiling, most differentiated</div></div>
+    <div class="tile"><div class="label">Effort</div><div class="value">~60–90 h</div><div class="note">CPE attribution is the hard part</div></div>
+    <div class="tile"><div class="label">Data cleanliness</div><div class="value stars"><span class="full">★★★</span><span class="empty">★★</span></div><div class="note">Entity resolution across 3 ID systems</div></div>
+    <div class="tile"><div class="label">Universe</div><div class="value">~10 vendors</div><div class="note">MSFT, AMZN, GOOGL, ORCL, CRM, SAP, NOW, SNOW (+IBM, WDAY)</div></div>
+    <div class="tile"><div class="label">Window</div><div class="value">FY2016 → now</div><div class="note">Filings + 10k+ CVEs + KEV catalog</div></div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1.05fr 1fr;">
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>The interview story</h3>
+        <p class="quote">“The enterprise-tech vendors compounding revenue fastest are also accumulating the <strong>most severe, most-exploited vulnerabilities</strong> — here’s that trade-off, measured, with every number traceable to a primary-source filing or a government vulnerability record.”</p>
+      </div>
+      <div class="card">
+        <h3>Three pillars + a capstone hypothesis</h3>
+        <div class="pillars">
+          <div class="pillar"><div class="pt">A · Financials</div><div class="pd">Reportable-segment revenue, operating income, YoY growth from SEC EDGAR XBRL.</div></div>
+          <div class="pillar"><div class="pt">B · Market position</div><div class="pd">Revenue mix within the peer set + free adoption signals — <em>never</em> fabricated market share.</div></div>
+          <div class="pillar"><div class="pt">C · Security exposure</div><div class="pd">NVD CVE burden, CVSS mix, CISA KEV exploited-rate, publication-to-KEV lag.</div></div>
+        </div>
+        <div class="callout" style="margin-top:11px"><strong>Capstone:</strong> join A × C into a vendor scorecard and test one crisp hypothesis — is higher cloud-revenue growth associated (Spearman) with a heavier severe/exploited vulnerability load?</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Key analytical questions</h3>
+      <ol class="qlist">
+        <li>How does <strong>AWS’s clean segment disclosure</strong> compare to MSFT’s blended “Intelligent Cloud” and GCP’s line — where does analysis hit the disclosure wall?</li>
+        <li>Do <strong>developer-adoption signals</strong> (Stack Overflow survey, GH Archive) corroborate the revenue momentum ranking?</li>
+        <li>Which vendors carry the largest <strong>CVE burden</strong>, and how has their severity mix shifted YoY?</li>
+        <li>What fraction of each vendor’s CVEs became <strong>actively exploited</strong> (CISA KEV) — and how fast?</li>
+        <li>Is faster cloud growth <strong>statistically associated</strong> with heavier severe/exploited load?</li>
+      </ol>
+    </div>
+  </div>
+  <div class="foot"><span>Project 04 · Cloud, ERP &amp; AI Vendor Intelligence</span><span>9 / 14</span></div>
+</section>
+
+<!-- ============ SLIDE 10 — P4 DATA & METHOD ============ -->
+<section class="slide p4">
+  <div class="head">
+    <div class="accent-bar"></div>
+    <div>
+      <p class="eyebrow">Project 04 · Data &amp; method</p>
+      <h1>Vendor Intelligence — pipeline, data, risks</h1>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1.15fr 1fr;">
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>Verified data sources</h3>
+        <table class="mini">
+          <tr><th>Source</th><th>Role</th><th>Access</th></tr>
+          <tr><td class="src">NVD CVE API 2.0</td><td><strong>Primary security dataset</strong> — CVEs per vendor via CPE matching; CVSS severity + dates</td><td>Free key → 50 req/30s; paginate, cache</td></tr>
+          <tr><td class="src">CISA KEV catalog</td><td>Actively-exploited flags → exploited-rate, publication-to-KEV lag</td><td>JSON/CSV, no key; CC0 mirror</td></tr>
+          <tr><td class="src">SEC EDGAR XBRL</td><td><strong>Primary financial dataset</strong> — total &amp; segment revenue/income per vendor</td><td class="warn">Segment tags non-standard — may parse 10-K notes</td></tr>
+          <tr><td class="src">Stack Overflow survey</td><td>Adoption corroboration: YoY tool-usage share</td><td class="warn">Self-selected; columns change yearly — directional only</td></tr>
+          <tr><td class="src">GH Archive / yfinance / MITRE</td><td>Optional: mindshare proxy · equity panel · bulk CVE fallback</td><td>BigQuery free tier · cache · shallow clone</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Flagship visuals</h3>
+        <div class="chips">
+          <span class="chip">Segment revenue panel w/ is_disclosed shading</span>
+          <span class="chip">Revenue-mix treemap</span>
+          <span class="chip">Adoption-vs-revenue momentum</span>
+          <span class="chip">CVE burden + severity stacked area</span>
+          <span class="chip">Exploited-rate ranked bar</span>
+          <span class="chip">Capstone scorecard scatter</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>Methodology</h3>
+        <div class="steps">
+          <div class="step"><div class="n">1</div><div class="t"><strong>Vendor crosswalk: ticker ↔ CIK ↔ CPE strings</strong> — the hard entity-resolution artifact.</div></div>
+          <div class="step"><div class="n">2</div><div class="t">Rate-limited, cached ingest: NVD, KEV, EDGAR segment facts, survey CSVs.</div></div>
+          <div class="step"><div class="n">3</div><div class="t"><strong>Pillar A</strong> — segment panel + revenue mix; flag undisclosed cloud lines.</div></div>
+          <div class="step"><div class="n">4</div><div class="t"><strong>Pillar C</strong> — CVE attribution via CPE; KEV join; exploited-rate + lag.</div></div>
+          <div class="step"><div class="n">5</div><div class="t"><strong>Capstone</strong> — vendor scorecard; Spearman: growth vs. severe/exploited load.</div></div>
+          <div class="step"><div class="n">6</div><div class="t">pandera gates → Streamlit scorecard → pytest + CI → licensing/limitations README.</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Risks &amp; honesty constraints</h3>
+        <ul class="compact">
+          <li><strong>Never fabricate Azure/GCP dollar revenue</strong> — MSFT/Google disclose growth % only; model the gap with an is_disclosed flag.</li>
+          <li><strong>CPE attribution is imperfect</strong> — counts are estimates; validate a sample, report attribution error.</li>
+          <li><strong>True market share is paywalled</strong> (Gartner/Canalys/Synergy) — press headlines are context only, never a dataset.</li>
+          <li>Keep to ~10 vendors — expanding the crosswalk balloons entity-resolution effort; equity analysis stays non-causal.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Project 04 · Cloud, ERP &amp; AI Vendor Intelligence</span><span>10 / 14</span></div>
+</section>
+
+<!-- ============ SLIDE 11 — P5 PITCH ============ -->
+<section class="slide p5">
+  <div class="head">
+    <div class="accent-bar"></div>
+    <div>
+      <p class="eyebrow">Project 05 · Damodaran capstone — built &amp; runnable</p>
+      <h1>Industry Value-Chain &amp; the Margin-Distortion Anomaly</h1>
+      <p class="subtitle">Conform ~8 of Damodaran's industry datasets onto one <code>dim_industry</code> spine in DuckDB, test one honest cross-dataset thesis, and export a Supabase-ready Postgres database.</p>
+    </div>
+  </div>
+  <div class="kpi-row">
+    <div class="tile"><div class="label">Difficulty</div><div class="value">Advanced</div><div class="note">Entity resolution + accounting literacy</div></div>
+    <div class="tile"><div class="label">Effort</div><div class="value">~55–80 h</div><div class="note">Reuses the portfolio plumbing</div></div>
+    <div class="tile"><div class="label">Data cleanliness</div><div class="value stars"><span class="full">★★★★</span><span class="empty">★</span></div><div class="note">Clean values, dirty join key</div></div>
+    <div class="tile"><div class="label">Universe</div><div class="value">94 industries</div><div class="note">Jan-2026 · TTM ≈ Q3 2025</div></div>
+    <div class="tile"><div class="label">Deliverable</div><div class="value">Postgres DB</div><div class="note">Runnable pipeline + Supabase SQL</div></div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1.05fr 1fr;">
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>The interview story</h3>
+        <p class="quote">“I conformed ~30 of Damodaran's industry tables onto one <strong>dim_industry</strong> spine, then used the <strong>join</strong> to surface a claim no single page states — <strong>EV/Sales tracks the R&amp;D-adjusted margin, not the reported one.</strong> Every number is validated against his firm counts, and I'm explicit these are value-weighted aggregates — association, not causation.”</p>
+      </div>
+      <div class="card">
+        <h3>One spine: the value chain</h3>
+        <div class="pillars">
+          <div class="pillar"><div class="pt">R&amp;D</div><div class="pd">Intangible investment — intensity + Damodaran's capitalized-R&amp;D estimate.</div></div>
+          <div class="pillar"><div class="pt">Margins</div><div class="pd">Reported vs. R&amp;D/lease-adjusted operating margin — the distortion.</div></div>
+          <div class="pillar"><div class="pt">Financing</div><div class="pd">Dividends, buybacks, issuance, debt — the funding &amp; payout signature.</div></div>
+        </div>
+        <div class="callout" style="margin-top:11px"><strong>Headline:</strong> EV/Sales tracks the adjusted margin better than reported (R² 0.425 vs 0.406) across 84 non-financial industries; the adjustment reranks only 1/84 by ≥ 5 places (ρ 0.998) — the distortion is concentrated in the high-R&amp;D tail.</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Key analytical questions</h3>
+      <ol class="qlist">
+        <li>How far does the R&amp;D/lease adjustment move each industry's margin, and <strong>how many rank reversals</strong> result?</li>
+        <li>Does the market (<strong>EV/Sales, P/E</strong>) track the reported or the adjusted margin?</li>
+        <li>Which industries return capital <strong>funded by debt</strong> (net buybacks + net debt raised)?</li>
+        <li>Do gross buybacks <strong>overstate cash returned</strong> where stock-based comp is high?</li>
+        <li>Do industries <strong>cluster</strong> into life-cycle / financing archetypes?</li>
+        <li><em>(panel)</em> Is the reported-vs-adjusted gap <strong>widening</strong> across vintages?</li>
+      </ol>
+    </div>
+  </div>
+  <div class="foot"><span>Project 05 · Industry Value-Chain</span><span>11 / 14</span></div>
+</section>
+
+<!-- ============ SLIDE 12 — P5 DATA & METHOD ============ -->
+<section class="slide p5">
+  <div class="head">
+    <div class="accent-bar"></div>
+    <div>
+      <p class="eyebrow">Project 05 · Data &amp; method</p>
+      <h1>Industry Value-Chain — pipeline, schema, risks</h1>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1.15fr 1fr;">
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>Verified data sources (Damodaran, NYU Stern)</h3>
+        <table class="mini">
+          <tr><th>Source</th><th>Role</th><th>Access</th></tr>
+          <tr><td class="src">margin · R&amp;D · finflows</td><td>Core thesis: margins, R&amp;D intensity, financing flows</td><td>Direct <code>/pc/datasets/&lt;stem&gt;.xls</code></td></tr>
+          <tr><td class="src">psdata · pedata · divfcfe</td><td>Market payoff: EV/Sales, P/E; payout vs FCFE</td><td>Same host + 94-industry key</td></tr>
+          <tr><td class="src">Archives</td><td>Prior vintages → the multi-year panel</td><td class="warn">/pc/archives/&lt;stem&gt;&lt;YY&gt;.xls</td></tr>
+          <tr><td class="src">SEC EDGAR (opt.)</td><td>Within-industry dispersion (extension)</td><td>Bridge via SIC — GICS is paywalled</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Flagship visuals</h3>
+        <div class="chips">
+          <span class="chip">Reported-vs-adjusted margin dumbbell</span>
+          <span class="chip">Rank-reversal bump chart</span>
+          <span class="chip">Market-pricing scatter (EV/Sales)</span>
+          <span class="chip">Financing quadrant (buybacks × debt)</span>
+          <span class="chip">Life-cycle cluster map</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card">
+        <h3>Methodology</h3>
+        <div class="steps">
+          <div class="step"><div class="n">1</div><div class="t"><strong>Ingest</strong> 6 canonical <code>.xls</code> (+2 local) → SHA-256 pinned vintage.</div></div>
+          <div class="step"><div class="n">2</div><div class="t"><strong>Parse</strong> — dynamic header (row-0 &amp; row-7), NA→NULL, strip Total rows.</div></div>
+          <div class="step"><div class="n">3</div><div class="t"><strong>Resolve</strong> industry_id via alias crosswalk; <strong>fail loud</strong> on any unmatched name.</div></div>
+          <div class="step"><div class="n">4</div><div class="t"><strong>DuckDB star schema</strong> — dim_industry + 8 facts + wide mart.</div></div>
+          <div class="step"><div class="n">5</div><div class="t"><strong>Analysis</strong> — rank-reversal + market-pricing OLS/HC3 (numpy).</div></div>
+          <div class="step"><div class="n">6</div><div class="t"><strong>Export</strong> → Supabase Postgres (schema, seed, mart, RLS) + CSVs.</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Risks &amp; honesty constraints</h3>
+        <ul class="compact">
+          <li><strong>Value-weighted aggregates</strong> (n≤94) — association, not causation; ecological fallacy.</li>
+          <li><strong>R&amp;D-adjusted-margin circularity</strong> — never regress it on R&amp;D; a lint blocks the pairing.</li>
+          <li><strong>Net Equity Change = issuance − buybacks</strong> (data over the file's wrong note).</li>
+          <li><strong>Join on a surrogate id, not the text</strong> — catches the real <code>Heathcare</code> typo; URLs overwrite each Jan → pin + hash.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Project 05 · Industry Value-Chain</span><span>12 / 14</span></div>
+</section>
+
+<!-- ============ SLIDE 13 — DATA FOUNDATION ============ -->
+<section class="slide p0">
+  <div class="head">
+    <div class="accent-bar"></div>
+    <div>
+      <p class="eyebrow">Master dataset reference</p>
+      <h1>The data foundation — free &amp; adversarially verified</h1>
+      <p class="subtitle">Every source behind the four projects passed <strong>43 adversarial verification checks</strong>. No paid data, no ToS-violating scrapes — and the failures found during verification are documented with working replacements.</p>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
+    <div class="card nodot">
+      <h3>✅ Fully open — no account</h3>
+      <ul class="compact">
+        <li><strong>SEC EDGAR XBRL</strong> — 3 of 4 projects; User-Agent header, 10 req/s, US filers only.</li>
+        <li><strong>NVD CVE API 2.0 · CISA KEV · MITRE cvelistV5</strong> — the security record.</li>
+        <li><strong>OWID COVID · Oxford OxCGRT</strong> — cases &amp; stringency (OWID frozen Aug 2024).</li>
+        <li><strong>Damodaran NYU</strong> — industry benchmarks (URLs rotate each January — pin).</li>
+        <li><strong>yfinance</strong> — all projects; fragile (429s) → fetch once, cache, retry.</li>
+        <li><strong>Wikipedia · Stack Overflow survey · World Bank · Bain/Altagamma headlines · company URD PDFs · GH Archive</strong>.</li>
+      </ul>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card nodot">
+        <h3>🔑 Free with an instant key</h3>
+        <ul class="compact">
+          <li><strong>FRED</strong> — ~120 req/min; macro + VIX series.</li>
+          <li><strong>BEA</strong> — GDP-by-industry (optional).</li>
+          <li><strong>BLS</strong> — 500 queries/day (most series also on FRED).</li>
+          <li><strong>Kaggle</strong> — Fortune enrichment; pin slug + version.</li>
+        </ul>
+      </div>
+      <div class="card nodot">
+        <h3>🚫 Paywalled — excluded, do not scrape</h3>
+        <ul class="compact">
+          <li>Statista · Macrotrends (ToS forbids bots) · stockanalysis.com.</li>
+          <li>Gartner / Canalys / Synergy / IDC share reports → replaced by filings, free headlines, and revenue-mix / adoption proxies.</li>
+        </ul>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:14px; min-width:0;">
+      <div class="card nodot">
+        <h3>⚠️ Corrections found in verification</h3>
+        <ul class="compact">
+          <li><strong>Stooq direct CSV → blocked</strong> by a JS anti-bot wall. Fix: yfinance / pandas-datareader readers, cached.</li>
+          <li><strong>Fortune combined CSV → 404.</strong> Fix: per-year files 2005–2019, concatenated, SHA-pinned.</li>
+          <li><strong>Financial Modeling Prep → endpoints changed/capped.</strong> Fix: SEC EDGAR XBRL as ground truth.</li>
+        </ul>
+      </div>
+      <div class="card nodot">
+        <h3>The reusable toolkit</h3>
+        <ul class="compact">
+          <li><strong>SEC EDGAR XBRL client</strong> — used by 3 of 4 projects.</li>
+          <li><strong>yfinance fetcher</strong> with Parquet caching + retry — all four.</li>
+          <li><strong>Damodaran .xls benchmark loader</strong> — Luxury + Fortune 500.</li>
+          <li><strong>Generic cached HTTP client</strong> (retry/back-off, on-disk cache) — every REST/CSV source.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Finance Data Portfolio — Data Foundation</span><span>13 / 14</span></div>
+</section>
+
+<!-- ============ SLIDE 14 — CLOSING ============ -->
+<section class="slide p0">
+  <div class="head">
+    <div class="accent-bar"></div>
+    <div>
+      <p class="eyebrow">Why this portfolio works</p>
+      <h1>Defensible numbers, shared spine, compounding effort</h1>
+    </div>
+  </div>
+  <div class="card nodot" style="margin-bottom:14px; padding:14px 17px;">
+    <h3>One engineering spine across all five projects</h3>
+    <div class="flow">
+      <div class="fnode p0"><div class="fn">Free verified APIs</div><div class="fd">EDGAR, FRED, NVD/KEV, OWID, Damodaran…</div></div>
+      <div class="farrow">→</div>
+      <div class="fnode p0"><div class="fn">Cached ingestion</div><div class="fd">Fetch once → Parquet; retry/back-off; pinned versions</div></div>
+      <div class="farrow">→</div>
+      <div class="fnode p0"><div class="fn">DuckDB warehouse</div><div class="fd">raw → staging → marts, with lineage</div></div>
+      <div class="farrow">→</div>
+      <div class="fnode p0"><div class="fn">Quality gates</div><div class="fd">pandera checks + pytest over every formula</div></div>
+      <div class="farrow">→</div>
+      <div class="fnode p0"><div class="fn">Delivery</div><div class="fd">Streamlit dashboard + GitHub Actions CI + findings README</div></div>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns: 1fr 1fr;">
+    <div class="card nodot">
+      <h3>Honesty as a feature</h3>
+      <ul class="compact">
+        <li>Metrics are <strong>defined where they’re defensible</strong> — “market share” means share within the covered, listed peer set, reproducible from primary filings.</li>
+        <li><strong>Disclosure gaps are modeled, not papered over</strong> — is_disclosed flags for Azure/GCP; attribution error reported for CVE↔vendor matching.</li>
+        <li><strong>Crosswalks and caveats are first-class artifacts</strong> — taxonomy mappings, alias tables, FX conventions, and frequency-alignment choices are all documented and tested.</li>
+        <li>Each brief ships with <strong>pre-written honest CV bullets</strong> and clearly scoped extensions (backtests, event studies, factor decompositions, auto-refresh).</li>
+      </ul>
+    </div>
+    <div class="card nodot">
+      <h3>The narrative arc</h3>
+      <ul class="compact">
+        <li><strong>Start: Fortune 500</strong> — prove the data-engineering craft and build the shared toolkit (~40–70 h).</li>
+        <li><strong>Flagship: Sector Rotation</strong> — a formal event study with CARs and t-tests; the strongest quant story per hour invested.</li>
+        <li><strong>Recruiter magnet: Luxury Comps</strong> — sell-side comps work: normalization, crosswalks, valuation vs. fundamentals.</li>
+        <li><strong>Capstone: Vendor Intel</strong> — finance × cybersecurity; a measured growth-vs-risk trade-off nobody else in the stack of CVs will have.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Finance Data Portfolio</span><span>14 / 14</span></div>
+</section>
+
+</body>
+</html>
